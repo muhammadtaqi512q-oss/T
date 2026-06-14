@@ -3,15 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Automated GitHub Workflow Site</title>
+    <title>My Simple Data Saver</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="card">
-        <h2>GitHub Workflow Demo</h2>
-        <p id="status">Loading data from data.json...</p>
-        <button id="btn">Click Me</button>
+    <div class="container">
+        <h2>My Personal Notes (No Login)</h2>
+        <p class="subtitle">Data aap ke hi browser mein save rahega!</p>
+        
+        <div class="input-area">
+            <input type="text" id="noteInput" placeholder="Yahan kuch bhi likhein...">
+            <button id="saveBtn">Save Note</button>
+        </div>
+
+        <h3>Saved Notes:</h3>
+        <ul id="notesList"></ul>
     </div>
+
     <script src="script.js"></script>
 </body>
 </html>

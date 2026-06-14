@@ -1,5 +1,3 @@
 {
-    "status": "success",
-    "message": "Hello from automated data.json file!",
-    "version": "1.0.0"
+    "info": "This site uses LocalStorage to save data directly in the browser without a login system."
 }
