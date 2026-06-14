@@ -1,0 +1,138 @@
+name: Generate and Deploy Static Site
+
+on:
+  # Jab bhi aap main branch par push karenge ya manually run karenge
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # 1. Yahan GitHub Workflow khud HTML file banaye ga
+      - name: Create index.html
+        run: |
+          cat << 'EOF' > index.html
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>Automated GitHub Workflow Site</title>
+              <link rel="stylesheet" href="style.css">
+          </head>
+          <body>
+              <div class="card">
+                  <h2>GitHub Workflow Demo</h2>
+                  <p id="status">Loading data from data.json...</p>
+                  <button id="btn">Click Me</button>
+              </div>
+              <script src="script.js"></script>
+          </body>
+          </html>
+          EOF
+
+      # 2. Yahan Workflow CSS file banaye ga
+      - name: Create style.css
+        run: |
+          cat << 'EOF' > style.css
+          body {
+              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+              background-color: #1a1a1a;
+              color: #ffffff;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              height: 100vh;
+              margin: 0;
+          }
+          .card {
+              background: #2a2a2a;
+              padding: 30px;
+              border-radius: 12px;
+              box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+              text-align: center;
+          }
+          button {
+              background-color: #007bff;
+              color: white;
+              border: none;
+              padding: 10px 20px;
+              border-radius: 5px;
+              cursor: pointer;
+              font-size: 16px;
+          }
+          button:hover {
+              background-color: #0056b3;
+          }
+          EOF
+
+      # 3. Yahan Workflow JavaScript file banaye ga (Jo JSON data fetch karegi)
+      - name: Create script.js
+        run: |
+          cat << 'EOF' > script.js
+          document.addEventListener("DOMContentLoaded", () => {
+              // data.json se data read karna
+              fetch('data.json')
+                  .then(response => response.json())
+                  .then(data => {
+                      document.getElementById('status').innerText = `${data.message} - Version: ${data.version}`;
+                  })
+                  .catch(err => {
+                      document.getElementById('status').innerText = "Failed to load data.json";
+                      console.error(err);
+                  });
+
+              document.getElementById('btn').addEventListener('click', () => {
+                  alert("JavaScript is working perfectly!");
+              });
+          });
+          EOF
+
+      # 4. Yahan Workflow data.json file banaye ga
+      - name: Create data.json
+        run: |
+          cat << 'EOF' > data.json
+          {
+              "status": "success",
+              "message": "Hello from automated data.json file!",
+              "version": "1.0.0"
+          }
+          EOF
+
+      # 5. Files ko automatic commit kar ke repo mein save karna (Optional)
+      - name: Commit Generated Files
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add index.html style.css script.js data.json
+          git diff-index --quiet HEAD || git commit -m "Automated: Generated frontend files and data.json"
+          git push origin main
+        continue-on-error: true
+
+      # 6. GitHub Pages par deploy karna
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
