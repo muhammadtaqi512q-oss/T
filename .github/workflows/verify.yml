@@ -1,0 +1,49 @@
+name: Backend API Validator
+
+on:
+  repository_dispatch:
+    types: [check-api-key]
+
+permissions:
+  contents: write
+
+jobs:
+  validate-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Secure Logic Check
+        id: security_gate
+        run: |
+          # Incoming payload se API key read karna
+          USER_API="${{ github.event.client_payload.api }}"
+          
+          # Strictly 10 length, starts with 'mt' aur chunks matching check
+          if [[ "$USER_API" =~ ^(mt)(mt|tm|zf|mh|az|5|12|14|72|786)+$ ]] && [ ${#USER_API} -eq 10 ]; then
+            echo "AUTH_STATUS=SUCCESS" >> $GITHUB_ENV
+            echo "API Key Validated on Backend!"
+          else
+            echo "AUTH_STATUS=FAILED" >> $GITHUB_ENV
+            echo "Unauthorized Access!"
+            exit 1
+          fi
+
+      - name: Compile Secure Output
+        if: env.AUTH_STATUS == 'SUCCESS'
+        run: |
+          # Server-side script run karke deployable code banana
+          node compile.js
+
+      - name: Deploy to GitHub Pages Branch
+        if: env.AUTH_STATUS == 'SUCCESS'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
