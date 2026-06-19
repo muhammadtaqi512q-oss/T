@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Directory</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #ffffff; color: #333; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        .search-container { width: 100%; max-width: 600px; margin-bottom: 30px; }
+        #searchBar { width: 100%; padding: 15px; border: 1px solid #ddd; border-radius: 50px; outline: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1); font-size: 16px; }
+        .user-card { background: #f9f9f9; padding: 20px; margin: 10px 0; border-radius: 15px; width: 100%; max-width: 600px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; justify-content: space-between; }
+        h2 { color: #222; }
+    </style>
+</head>
+<body>
+
+    <div class="search-container">
+        <input type="text" id="searchBar" placeholder="Search users by name..." onkeyup="filterUsers()">
+    </div>
+
+    <div id="userList"></div>
+
+    <script>
+        // Data jo aapne README.md mein likha hai
+        const users = [
+            { name: "MUHAMMAD TAQI", balance: "500,000.tm" },
+            { name: "TM", balance: "1 million.tm" },
+            { name: "ALI AHMED", balance: "250,000.tm" },
+            { name: "SARA KHAN", balance: "750,000.tm" },
+            { name: "HAMZA BUTT", balance: "1.2 million.tm" },
+            { name: "FATIMA ZAHRA", balance: "900,000.tm" },
+            { name: "USMAN", balance: "300,000.tm" },
+            { name: "ZM", balance: "450,000,000.tm" },
+            { name: "HASSAN", balance: "600,000.tm" },
+            { name: "AYESHA NOOR", balance: "850,000.tm" },
+            { name: "OMAR", balance: "2 million.tm" },
+            { name: "MARIA KHAN", balance: "150,000.tm" }
+        ];
+
+        function displayUsers(filter = "") {
+            const list = document.getElementById("userList");
+            list.innerHTML = "";
+            users.filter(u => u.name.toLowerCase().includes(filter.toLowerCase())).forEach(u => {
+                list.innerHTML += `<div class="user-card"><span><b>${u.name}</b></span><span>Balance: ${u.balance}</span></div>`;
+            });
+        }
+
+        function filterUsers() {
+            displayUsers(document.getElementById("searchBar").value);
+        }
+
+        displayUsers();
+    </script>
+</body>
+</html>
