@@ -1,4 +1,4 @@
-name: Build Android APK with Live Preview
+name: Build Android APK with Mic Support
 
 on:
   push:
@@ -36,26 +36,29 @@ jobs:
           # 1. Create Cordova App
           cordova create vibeApp com.taqi.vibe Vibe
           
-          # 2. Copy Source Code & Assets
+          # 2. Copy Web Source Code
           cp index.html vibeApp/www/
-          if [ -f "icon.png" ]; then
-            cp icon.png vibeApp/www/icon.png
-            sed -i '/<\/widget>/i \    <icon src="www/icon.png" />' vibeApp/config.xml
+          
+          # 3. Enter Project Directory
+          cd vibeApp
+
+          # 4. Copy Icon & Inject into config.xml
+          if [ -f "../icon.png" ]; then
+            cp ../icon.png www/icon.png
+            sed -i '/<\/widget>/i \    <icon src="www/icon.png" />' config.xml
           fi
           
-          cd vibeApp
-          
-          # 3. Add Android Platform
+          # 5. Add Android Platform
           cordova platform add android
           
-          # 4. Install Plugins for Microphone Access
+          # 6. Install Plugins for Microphone Access
           cordova plugin add cordova-plugin-android-permissions
           cordova plugin add cordova-plugin-media-capture
           
-          # 5. Inject Manifest Permissions
+          # 7. Inject Manifest Permissions
           sed -i '/<\/manifest>/i \    <uses-permission android:name="android.permission.INTERNET" />\n    <uses-permission android:name="android.permission.RECORD_AUDIO" />\n    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />\n    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />\n    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />' platforms/android/app/src/main/AndroidManifest.xml
           
-          # 6. Build APK
+          # 8. Build Debug APK
           cordova build android --debug
 
       - name: Upload APK Artifact
@@ -63,21 +66,3 @@ jobs:
         with:
           name: vibe-debug-apk
           path: vibeApp/platforms/android/app/build/outputs/apk/debug/app-debug.apk
-
-      - name: Generate Online Interactive Preview Link
-        if: always()
-        run: |
-          APK_PATH="vibeApp/platforms/android/app/build/outputs/apk/debug/app-debug.apk"
-          
-          # Upload APK to Appetize.io Public API for live browser preview
-          RESPONSE=$(curl -s -F "file=@$APK_PATH" https://appetize.io/api/v2/apps/public)
-          PUBLIC_KEY=$(echo "$RESPONSE" | grep -o '"publicKey":"[^"]*' | cut -d'"' -f4)
-          
-          if [ -n "$PUBLIC_KEY" ]; then
-            PREVIEW_URL="https://appetize.io/app/$PUBLIC_KEY"
-            echo "### 📱 Live App Interactive Preview" >> $GITHUB_STEP_SUMMARY
-            echo "[Click Here to Open App Simulator in Browser]($PREVIEW_URL)" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "### 📱 Live Preview Instructions" >> $GITHUB_STEP_SUMMARY
-            echo "Upload your built APK manually to [Appetize.io Upload](https://appetize.io/upload) to test inside your browser." >> $GITHUB_STEP_SUMMARY
-          fi
