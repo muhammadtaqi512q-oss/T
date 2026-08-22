@@ -24,7 +24,7 @@ jobs:
         with:
           node-version: 18
 
-      - name: Install Cordova & Build APK with Icon
+      - name: Install Cordova & Build APK
         run: |
           npm install -g cordova
           
@@ -34,17 +34,37 @@ jobs:
           # 2. Copy Web Source
           cp index.html app/www/
           
-          # 3. Add Custom Icon if icon.png exists
+          # 3. Handle Icon if present
           if [ -f "icon.png" ]; then
             cp icon.png app/www/icon.png
-            sed -i '/<\/widget>/i \    <icon src="www/icon.png" />' app/config.xml
           fi
-          
-          # 4. Inject Android Permissions safely into config.xml
-          sed -i '/<\/widget>/i \    <platform name="android">\n        <config-file target="AndroidManifest.xml" parent="/*">\n            <uses-permission name="android.permission.RECORD_AUDIO" />\n            <uses-permission name="android.permission.MODIFY_AUDIO_SETTINGS" />\n            <uses-permission name="android.permission.WRITE_EXTERNAL_STORAGE" />\n            <uses-permission name="android.permission.READ_EXTERNAL_STORAGE" />\n        </config-file>\n    </platform>' app/config.xml
 
-          # 5. Add Android Platform & Build
           cd app
+
+          # 4. Create robust config.xml directly
+          cat << 'EOF' > config.xml
+          <?xml meversion='1.0' encoding='utf-8'?>
+          <widget id="com.vibe9.nexura" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:android="http://schemas.android.com/apk/res/android" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+              <name>VIBE PRO</name>
+              <description>VIBE Messaging App</description>
+              <author email="dev@cordova.apache.org" href="https://cordova.apache.org">Cordova Team</author>
+              <content src="index.html" />
+              <allow-intent href="http://*/*" />
+              <allow-intent href="https://*/*" />
+              <icon src="www/icon.png" />
+              <platform name="android">
+                  <config-file target="AndroidManifest.xml" parent="/*">
+                      <uses-permission name="android.permission.RECORD_AUDIO" />
+                      <uses-permission name="android.permission.MODIFY_AUDIO_SETTINGS" />
+                      <uses-permission name="android.permission.READ_EXTERNAL_STORAGE" />
+                      <uses-permission name="android.permission.WRITE_EXTERNAL_STORAGE" />
+                  </config-file>
+              </platform>
+          </widget>
+          EOF
+
+          # 5. Add plugin & platform, then build
+          cordova plugin add cordova-custom-config
           cordova platform add android
           cordova build android --debug
 
