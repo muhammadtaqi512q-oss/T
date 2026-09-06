@@ -1,8 +1,9 @@
-from flask import Flask, render_template_string
+import os
+from flask import Flask, send_from_directory, Response
 
 app = Flask(__name__)
 
-# Main HTML (View Source / CTRL + U par sirf yeh dikhega)
+# Main HTML snippet shown on "View Source" (CTRL + U)
 MAIN_HTML = """<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,11 +16,16 @@ MAIN_HTML = """<!DOCTYPE html>
     <div id="nexura-app"></div>
 
     <script>
-        // Leading slash (/) add kiya taake API hamesha root URL se hi call ho
         fetch('/api/render-ui')
-            .then(response => response.text())
-            .then(htmlContent => {
-                document.getElementById('nexura-app').innerHTML = htmlContent;
+            .then(res => res.text())
+            .then(html => {
+                document.getElementById('nexura-app').innerHTML = html;
+                
+                // Execute scripts injected dynamically into the DOM
+                const scripts = document.getElementById('nexura-app').getElementsByTagName('script');
+                for (let i = 0; i < scripts.length; i++) {
+                    eval(scripts[i].innerText);
+                }
             })
             .catch(err => console.error('Error loading UI:', err));
     </script>
@@ -27,7 +33,7 @@ MAIN_HTML = """<!DOCTYPE html>
 </body>
 </html>"""
 
-# Backend JoyMix App UI Component
+# Dynamic UI Injected from Backend
 BACKEND_UI_COMPONENT = """
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 <style>
@@ -154,7 +160,7 @@ BACKEND_UI_COMPONENT = """
         backdrop-filter: blur(5px);
     }
 
-    /* Offline Template Custom Internal Styles */
+    /* Offline Theme Styles */
     :root {
         --bg-color: #0f0f0f;
         --card-bg: #181818;
@@ -162,9 +168,6 @@ BACKEND_UI_COMPONENT = """
         --subtext-color: #aaa;
         --border-color: rgba(255, 255, 255, 0.1);
         --chip-bg: rgba(255, 255, 255, 0.1);
-        --chip-hover-bg: #f1f1f1;
-        --chip-hover-text: #0f0f0f;
-        --shadow-color: rgba(0, 0, 0, 0.6);
     }
 
     body.light-theme {
@@ -174,9 +177,6 @@ BACKEND_UI_COMPONENT = """
         --subtext-color: #606060;
         --border-color: rgba(0, 0, 0, 0.1);
         --chip-bg: rgba(0, 0, 0, 0.05);
-        --chip-hover-bg: #0f0f0f;
-        --chip-hover-text: #ffffff;
-        --shadow-color: rgba(0, 0, 0, 0.15);
     }
 
     #offline-container {
@@ -231,7 +231,6 @@ BACKEND_UI_COMPONENT = """
         justify-content: center;
         cursor: pointer;
         border: 1px solid var(--border-color);
-        font-size: 16px;
     }
 
     .creator-link {
@@ -378,7 +377,7 @@ BACKEND_UI_COMPONENT = """
         color: var(--subtext-color);
     }
 
-    /* Mobile Full-Screen Player Modal */
+    /* Fullscreen Player Modal */
     .player-modal {
         display: none;
         position: fixed;
@@ -425,10 +424,6 @@ BACKEND_UI_COMPONENT = """
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
         border: 1px solid rgba(255, 255, 255, 0.3);
     }
-
-    .action-btn:active {
-        transform: scale(0.9);
-    }
 </style>
 
 <div id="selector-screen">
@@ -455,7 +450,7 @@ BACKEND_UI_COMPONENT = """
             <i class="fa-brands fa-youtube logo-icon"></i> JoyMix
         </a>
         <div class="header-actions">
-            <div class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
+            <div class="theme-toggle-btn" onclick="toggleTheme()">
                 <i class="fa-solid fa-moon" id="themeIcon"></i>
             </div>
             <a href="#" onclick="resetToMenu()" class="creator-link">
@@ -477,7 +472,7 @@ BACKEND_UI_COMPONENT = """
 
     <div class="player-modal" id="playerModal">
         <div class="controls-overlay">
-            <div class="action-btn" onclick="closePlayer()" title="Close Fullscreen">
+            <div class="action-btn" onclick="closePlayer()">
                 <i class="fa-solid fa-xmark"></i>
             </div>
         </div>
@@ -507,20 +502,19 @@ BACKEND_UI_COMPONENT = """
         document.getElementById('selector-screen').style.display = 'flex';
     }
 
-    // Static files path - Ensure these files are placed inside the /static/ directory
     const staticItems = [
-        { type: 'games', title: '50 Game Classic', path: '/static/50.html', icon: 'fa-trophy', bg: 'fa-gamepad' },
-        { type: 'games', title: 'Flappy Bird Arcade', path: '/static/Flappy-Bird.html', icon: 'fa-dove', bg: 'fa-crow' },
-        { type: 'games', title: 'Hill Climb Racing', path: '/static/Hill-Climb.html', icon: 'fa-truck', bg: 'fa-car' },
-        { type: 'games', title: 'Dino Runner v1', path: '/static/diano1.html', icon: 'fa-paw', bg: 'fa-dragon' },
-        { type: 'games', title: 'Dino Runner v2', path: '/static/diano2.html', icon: 'fa-dragon', bg: 'fa-dragon' },
-        { type: 'games', title: 'Ludo Star Online', path: '/static/ludo.html', icon: 'fa-dice-four', bg: 'fa-dice' },
-        { type: 'games', title: 'Stickman Hero', path: '/static/stickman.html', icon: 'fa-user-ninja', bg: 'fa-person-running' },
-        { type: 'games', title: 'Rock Paper Scissors', path: '/static/stone-paper-seasor.html', icon: 'fa-hand-back-fist', bg: 'fa-hand' },
-        { type: 'games', title: 'Tic Tac Toe Pro v2', path: '/static/tic-cros-2.html', icon: 'fa-xmark', bg: 'fa-hashtag' },
-        { type: 'games', title: 'Tic Tac Toe Classic', path: '/static/tic-cross.html', icon: 'fa-grip-lines', bg: 'fa-table-cells' },
-        { type: 'poetry', title: 'Poetry Cards & Quotes', path: '/static/poetry.html', icon: 'fa-book-open', bg: 'fa-feather' },
-        { type: 'images', title: 'Offline Image Storage', path: '/static/offline.html', icon: 'fa-box-archive', bg: 'fa-hard-drive' }
+        { type: 'games', title: '50 Game Classic', path: '50.html', icon: 'fa-trophy', bg: 'fa-gamepad' },
+        { type: 'games', title: 'Flappy Bird Arcade', path: 'Flappy-Bird.html', icon: 'fa-dove', bg: 'fa-crow' },
+        { type: 'games', title: 'Hill Climb Racing', path: 'Hill-Climb.html', icon: 'fa-truck', bg: 'fa-car' },
+        { type: 'games', title: 'Dino Runner v1', path: 'diano1.html', icon: 'fa-paw', bg: 'fa-dragon' },
+        { type: 'games', title: 'Dino Runner v2', path: 'diano2.html', icon: 'fa-dragon', bg: 'fa-dragon' },
+        { type: 'games', title: 'Ludo Star Online', path: 'ludo.html', icon: 'fa-dice-four', bg: 'fa-dice' },
+        { type: 'games', title: 'Stickman Hero', path: 'stickman.html', icon: 'fa-user-ninja', bg: 'fa-person-running' },
+        { type: 'games', title: 'Rock Paper Scissors', path: 'stone-paper-seasor.html', icon: 'fa-hand-back-fist', bg: 'fa-hand' },
+        { type: 'games', title: 'Tic Tac Toe Pro v2', path: 'tic-cros-2.html', icon: 'fa-xmark', bg: 'fa-hashtag' },
+        { type: 'games', title: 'Tic Tac Toe Classic', path: 'tic-cross.html', icon: 'fa-grip-lines', bg: 'fa-table-cells' },
+        { type: 'poetry', title: 'Poetry Cards & Quotes', path: 'poetry.html', icon: 'fa-book-open', bg: 'fa-feather' },
+        { type: 'images', title: 'Offline Image Storage', path: 'offline.html', icon: 'fa-box-archive', bg: 'fa-hard-drive' }
     ];
 
     function toggleTheme() {
@@ -532,29 +526,26 @@ BACKEND_UI_COMPONENT = """
 
     function loadFeed() {
         const grid = document.getElementById('feedGrid');
-        let allCards = [];
+        let htmlCards = '';
 
         staticItems.forEach(item => {
-            allCards.push({
-                category: item.type,
-                html: `
-                    <div class="card item-${item.type}" onclick="playDirectItem('${item.path}')">
-                        <div class="thumbnail">
-                            <i class="fa-solid ${item.bg} play-icon"></i>
-                            <span class="badge">${item.type.toUpperCase()}</span>
+            htmlCards += `
+                <div class="card item-${item.type}" onclick="playDirectItem('${item.path}')">
+                    <div class="thumbnail">
+                        <i class="fa-solid ${item.bg} play-icon"></i>
+                        <span class="badge">${item.type.toUpperCase()}</span>
+                    </div>
+                    <div class="card-details">
+                        <div class="avatar"><i class="fa-solid ${item.icon}"></i></div>
+                        <div class="info">
+                            <h3>${item.title}</h3>
+                            <p>JoyMix • Open Full Screen</p>
                         </div>
-                        <div class="card-details">
-                            <div class="avatar"><i class="fa-solid ${item.icon}"></i></div>
-                            <div class="info">
-                                <h3>${item.title}</h3>
-                                <p>JoyMix • Open Full Screen</p>
-                            </div>
-                        </div>
-                    </div>`
-            });
+                    </div>
+                </div>`;
         });
 
-        grid.innerHTML = allCards.map(c => c.html).join('');
+        grid.innerHTML = htmlCards;
     }
 
     function filterCategory(category, el) {
@@ -567,18 +558,12 @@ BACKEND_UI_COMPONENT = """
         });
     }
 
-    function playDirectItem(path) {
+    function playDirectItem(filename) {
         const playerModal = document.getElementById('playerModal');
         const mainFrame = document.getElementById('mainFrame');
         
-        mainFrame.src = path;
+        mainFrame.src = '/files/' + filename;
         playerModal.style.display = 'flex';
-        
-        if (playerModal.requestFullscreen) {
-            playerModal.requestFullscreen().catch(err => console.log(err));
-        } else if (playerModal.webkitRequestFullscreen) {
-            playerModal.webkitRequestFullscreen();
-        }
     }
 
     function closePlayer() {
@@ -587,25 +572,22 @@ BACKEND_UI_COMPONENT = """
         
         mainFrame.src = '';
         playerModal.style.display = 'none';
-
-        if (document.fullscreenElement || document.webkitFullscreenElement) {
-            if (document.exitFullscreen) {
-                document.exitFullscreen();
-            } else if (document.webkitExitFullscreen) {
-                document.webkitExitFullscreen();
-            }
-        }
     }
 </script>
 """
 
 @app.route('/')
 def home():
-    return render_template_string(MAIN_HTML)
+    return Response(MAIN_HTML, mimetype='text/html')
 
 @app.route('/api/render-ui')
 def render_ui():
-    return BACKEND_UI_COMPONENT
+    return Response(BACKEND_UI_COMPONENT, mimetype='text/html')
+
+@app.route('/files/<path:filename>')
+def serve_static_file(filename):
+    # Files serving directly from root or current directory
+    return send_from_directory(os.getcwd(), filename)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
