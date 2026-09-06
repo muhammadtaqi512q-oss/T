@@ -1,0 +1,123 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Royal Cyberpunk Tic-Tac-Toe</title>
+    <style>
+        :root {
+            --bg-color: #0a0e17;
+            --gold: #d4af37;
+            --neon-blue: #00f3ff;
+            --glass: rgba(255, 255, 255, 0.05);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--gold);
+            font-family: 'Segoe UI', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        h1 { text-shadow: 0 0 10px var(--gold); }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(3, 100px);
+            gap: 10px;
+            padding: 20px;
+            background: var(--glass);
+            border: 2px solid var(--gold);
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+        }
+
+        .cell {
+            width: 100px;
+            height: 100px;
+            border: 1px solid var(--gold);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .cell:hover { background: rgba(212, 175, 55, 0.1); }
+
+        #status { margin-top: 20px; font-size: 1.5rem; }
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: transparent;
+            color: var(--gold);
+            border: 1px solid var(--gold);
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>TIC-TAC-TOE</h1>
+    <div class="board" id="board">
+        <div class="cell" onclick="makeMove(0)"></div>
+        <div class="cell" onclick="makeMove(1)"></div>
+        <div class="cell" onclick="makeMove(2)"></div>
+        <div class="cell" onclick="makeMove(3)"></div>
+        <div class="cell" onclick="makeMove(4)"></div>
+        <div class="cell" onclick="makeMove(5)"></div>
+        <div class="cell" onclick="makeMove(6)"></div>
+        <div class="cell" onclick="makeMove(7)"></div>
+        <div class="cell" onclick="makeMove(8)"></div>
+    </div>
+    <div id="status">Player X's Turn</div>
+    <button onclick="resetGame()">Reset Game</button>
+
+    <script>
+        let board = ["", "", "", "", "", "", "", "", ""];
+        let currentPlayer = "X";
+        let gameActive = true;
+
+        function makeMove(index) {
+            if (board[index] === "" && gameActive) {
+                board[index] = currentPlayer;
+                document.getElementsByClassName("cell")[index].innerText = currentPlayer;
+                checkWinner();
+                currentPlayer = currentPlayer === "X" ? "O" : "X";
+                if(gameActive) document.getElementById("status").innerText = `Player ${currentPlayer}'s Turn`;
+            }
+        }
+
+        function checkWinner() {
+            const winPatterns = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+            for (let pattern of winPatterns) {
+                const [a, b, c] = pattern;
+                if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+                    document.getElementById("status").innerText = `Player ${board[a]} Wins!`;
+                    gameActive = false;
+                    return;
+                }
+            }
+            if (!board.includes("")) {
+                document.getElementById("status").innerText = "It's a Draw!";
+                gameActive = false;
+            }
+        }
+
+        function resetGame() {
+            board = ["", "", "", "", "", "", "", "", ""];
+            gameActive = true;
+            currentPlayer = "X";
+            document.querySelectorAll(".cell").forEach(c => c.innerText = "");
+            document.getElementById("status").innerText = "Player X's Turn";
+        }
+    </script>
+</body>
+</html>
