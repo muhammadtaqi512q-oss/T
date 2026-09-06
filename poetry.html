@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nature · Sad Poetry</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #0c0c0e;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .gallery {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            background: #0c0c0e;
+            overflow: hidden;
+        }
+        .slide {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transform: scale(1.04);
+            transition: opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            will-change: transform, opacity;
+            pointer-events: none;
+            background: #0c0c0e;
+        }
+        .slide.active {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: auto;
+            z-index: 10;
+        }
+        .slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            filter: brightness(0.95) saturate(1.0);
+        }
+        .slide::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg,
+                    rgba(0, 0, 0, 0.1) 0%,
+                    rgba(0, 0, 0, 0.55) 100%);
+            pointer-events: none;
+        }
+        .counter {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 30;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 13px;
+            font-weight: 500;
+            letter-spacing: 0.06em;
+            background: rgba(0, 0, 0, 0.45);
+            backdrop-filter: blur(18px) saturate(1.4);
+            -webkit-backdrop-filter: blur(18px) saturate(1.4);
+            padding: 10px 28px;
+            border-radius: 100px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .counter .num {
+            color: #fff;
+            font-weight: 600;
+            font-size: 15px;
+            min-width: 36px;
+            text-align: center;
+        }
+        .counter .total {
+            opacity: 0.5;
+        }
+        .counter .divider {
+            opacity: 0.25;
+        }
+        .progress-track {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            z-index: 25;
+            width: 100%;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.06);
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #f093fb, #f5576c, #ffecd2);
+            background-size: 200% 100%;
+            transition: width 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            animation: shimmer 3s ease-in-out infinite;
+        }
+        @keyframes shimmer {
+            0%,
+            100% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+        .nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 30;
+            background: rgba(0, 0, 0, 0.35);
+            backdrop-filter: blur(14px) saturate(1.3);
+            -webkit-backdrop-filter: blur(14px) saturate(1.3);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.85);
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            font-size: 22px;
+            line-height: 1;
+        }
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-50%) scale(1.08);
+            color: #fff;
+        }
+        .nav-btn:active {
+            transform: translateY(-50%) scale(0.94);
+        }
+        .nav-btn.prev {
+            left: 28px;
+        }
+        .nav-btn.next {
+            right: 28px;
+        }
+        .nav-btn svg {
+            width: 24px;
+            height: 24px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2.2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        .autoplay-btn {
+            position: absolute;
+            bottom: 40px;
+            right: 40px;
+            z-index: 30;
+            background: rgba(0, 0, 0, 0.35);
+            backdrop-filter: blur(14px) saturate(1.3);
+            -webkit-backdrop-filter: blur(14px) saturate(1.3);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.7);
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+        .autoplay-btn:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            transform: scale(1.06);
+        }
+        .autoplay-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        .autoplay-btn .pause-icon {
+            display: none;
+        }
+        .autoplay-btn.playing .play-icon {
+            display: none;
+        }
+        .autoplay-btn.playing .pause-icon {
+            display: block;
+        }
+        .hint {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 20;
+            color: rgba(255, 255, 255, 0.2);
+            font-size: 12px;
+            font-weight: 400;
+            letter-spacing: 0.04em;
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(8px);
+            padding: 6px 18px;
+            border-radius: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            white-space: nowrap;
+            transition: opacity 0.8s ease 4s;
+        }
+        .hint.hidden {
+            opacity: 0;
+        }
+        .slide.loading img {
+            opacity: 0;
+        }
+        .slide.loading::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, #1a1a1e 30%, #2a2a30 60%, #1a1a1e 90%);
+            background-size: 300% 300%;
+            animation: loadingPulse 1.8s ease-in-out infinite;
+            z-index: 1;
+        }
+        @keyframes loadingPulse {
+            0%,
+            100% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+        @media (max-width: 768px) {
+            .nav-btn {
+                width: 44px;
+                height: 44px;
+                font-size: 18px;
+            }
+            .nav-btn.prev {
+                left: 14px;
+            }
+            .nav-btn.next {
+                right: 14px;
+            }
+            .counter {
+                bottom: 28px;
+                padding: 8px 20px;
+                font-size: 12px;
+                gap: 8px;
+            }
+            .counter .num {
+                font-size: 13px;
+                min-width: 28px;
+            }
+            .autoplay-btn {
+                bottom: 28px;
+                right: 20px;
+                width: 38px;
+                height: 38px;
+            }
+            .autoplay-btn svg {
+                width: 17px;
+                height: 17px;
+            }
+            .hint {
+                display: none;
+            }
+            .progress-track {
+                height: 2px;
+            }
+        }
+        @media (max-width: 480px) {
+            .nav-btn {
+                width: 38px;
+                height: 38px;
+                font-size: 14px;
+            }
+            .nav-btn.prev {
+                left: 10px;
+            }
+            .nav-btn.next {
+                right: 10px;
+            }
+            .counter {
+                bottom: 22px;
+                padding: 6px 16px;
+                font-size: 11px;
+                gap: 6px;
+            }
+            .counter .num {
+                font-size: 12px;
+                min-width: 24px;
+            }
+            .autoplay-btn {
+                bottom: 22px;
+                right: 14px;
+                width: 34px;
+                height: 34px;
+            }
+        }
+        ::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="gallery" id="gallery" role="region" aria-label="Nature & Poetry Gallery">
+
+        <div class="progress-track" aria-hidden="true">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+
+        <div class="counter" aria-live="polite">
+            <span class="num" id="currentNum">1</span>
+            <span class="divider">/</span>
+            <span class="total" id="totalNum">200</span>
+        </div>
+
+        <button class="nav-btn prev" id="prevBtn" aria-label="Previous">
+            <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <button class="nav-btn next" id="nextBtn" aria-label="Next">
+            <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+
+        <button class="autoplay-btn playing" id="autoplayBtn" aria-label="Toggle autoplay">
+            <svg class="play-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            <svg class="pause-icon" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+        </button>
+
+        <div class="hint" id="hint">←  →  ·  Space to pause</div>
+    </div>
+
+    <script>
+        (function() {
+            'use strict';
+
+            // ─── Config ───
+            const TOTAL = 200;
+            const AUTOPLAY_DELAY = 4200;
+
+            // ─── DOM refs ───
+            const gallery = document.getElementById('gallery');
+            const progressBar = document.getElementById('progressBar');
+            const currentNum = document.getElementById('currentNum');
+            const totalNum = document.getElementById('totalNum');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const autoplayBtn = document.getElementById('autoplayBtn');
+            const hint = document.getElementById('hint');
+            totalNum.textContent = TOTAL;
+
+            // ─── State ───
+            let currentIndex = 0;
+            let activePhysicalIdx = 0;
+            let slides = [];
+            let isTransitioning = false;
+            let isPlaying = true;
+            let autoplayTimer = null;
+
+            // ─── Sad Poetry (English) ───
+            const poems = [
+                "The forest weeps in silent rain,\nIts tears wash away my pain.",
+                "Mountains tall, yet I feel small,\nMy heart echoes a lonely call.",
+                "The river flows, but never returns,\nLike the love my soul still yearns.",
+                "Sunset bleeds across the sky,\nA final tear before I cry.",
+                "The wind whispers your name to me,\nBut you are lost, I cannot see.",
+                "Beneath the stars, I stand alone,\nA heart of stone, a life unknown.",
+                "The meadow green, now brown and dry,\nLike hope that faded from my eye.",
+                "Clouds drift slow, they hide the light,\nJust as sorrow hides my sight.",
+                "The ocean waves, they come and go,\nCarrying memories of long ago.",
+                "A fallen leaf, a broken stem,\nI am but a ghost of them.",
+                "The sun may rise, but not for me,\nI dwell in shadow, endlessly.",
+                "Birds fly south, they leave the cold,\nBut I am left, growing old.",
+                "The garden sleeps beneath the frost,\nAll its beauty, forever lost.",
+                "Raindrops fall like tears from heaven,\nEach one a promise never given.",
+                "The silent hills, the empty sky,\nThey know the reason why I cry.",
+                "A lonely tree on a barren hill,\nMy heart is still, my soul is ill.",
+                "The moonlight paints the world in grey,\nIt matches the colour of my day.",
+                "Dewdrops glisten, but bring no cheer,\nThey are the tears of yesteryear.",
+                "The stream that sang, now silent runs,\nLike my laughter, all undone.",
+                "Thunder rolls, but brings no rain,\nOnly echoes of my pain.",
+                "The sky is grey, the earth is bare,\nI search for you, but you're not there.",
+                "A single flower in the snow,\nBrave but doomed, like all I know.",
+                "The horizon fades into the night,\nTaking with it my last light.",
+                "Winds of change, they cut so deep,\nThey wake the sorrow I can't keep.",
+                "The autumn leaves, they fall and die,\nJust like the hope within my eye."
+            ];
+
+            // ─── Beautiful Nature Drawing ───
+            function drawNature(ctx, w, h, seed) {
+                // Use seed for consistent randomness per image
+                const rng = (s) => {
+                    return function() {
+                        s = (s * 9301 + 49297) % 233280;
+                        return s / 233280;
+                    };
+                };
+                const rand = rng(seed + 42);
+
+                // 1. Sky gradient (sunset/sunrise vibes)
+                const skyHue1 = 200 + rand() * 60; // blue to purple
+                const skyHue2 = (skyHue1 + 30 + rand() * 60) % 360;
+                const skySat = 50 + rand() * 40;
+                const skyLight1 = 30 + rand() * 40;
+                const skyLight2 = 20 + rand() * 30;
+
+                const skyGrad = ctx.createLinearGradient(0, 0, 0, h * 0.7);
+                skyGrad.addColorStop(0, `hsl(${skyHue1}, ${skySat}%, ${skyLight1 + 20}%)`);
+                skyGrad.addColorStop(0.5, `hsl(${skyHue2}, ${skySat}%, ${skyLight1}%)`);
+                skyGrad.addColorStop(1, `hsl(${skyHue1 + 30}, ${skySat - 10}%, ${skyLight2}%)`);
+                ctx.fillStyle = skyGrad;
+                ctx.fillRect(0, 0, w, h * 0.7);
+
+                // 2. Sun or moon
+                const celestial = rand() > 0.5 ? 'sun' : 'moon';
+                const cx = w * 0.1 + rand() * 0.8 * w;
+                const cy = h * 0.05 + rand() * 0.3 * h;
+                const radius = 40 + rand() * 60;
+
+                ctx.save();
+                ctx.shadowColor = celestial === 'sun' ? 'rgba(255,200,100,0.6)' : 'rgba(200,200,255,0.4)';
+                ctx.shadowBlur = 80;
+
+                if (celestial === 'sun') {
+                    const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
+                    grad.addColorStop(0, '#fffbe6');
+                    grad.addColorStop(0.4, '#ffdd77');
+                    grad.addColorStop(1, `hsla(${45}, 80%, 60%, 0.3)`);
+                    ctx.fillStyle = grad;
+                } else {
+                    const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
+                    grad.addColorStop(0, '#f0f0ff');
+                    grad.addColorStop(0.7, '#c0c0e0');
+                    grad.addColorStop(1, `hsla(${220}, 30%, 60%, 0.1)`);
+                    ctx.fillStyle = grad;
+                }
+                ctx.beginPath();
+                ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+                ctx.restore();
+
+                // 3. Clouds
+                for (let i = 0; i < 6 + rand() * 8; i++) {
+                    const cloudX = rand() * w;
+                    const cloudY = rand() * h * 0.4;
+                    const cloudW = 60 + rand() * 200;
+                    const cloudH = 20 + rand() * 40;
+                    ctx.save();
+                    ctx.globalAlpha = 0.3 + rand() * 0.3;
+                    ctx.fillStyle = `hsl(0, 0%, ${80 + rand() * 20}%)`;
+                    ctx.shadowColor = 'rgba(255,255,255,0.1)';
+                    ctx.shadowBlur = 30;
+                    ctx.beginPath();
+                    ctx.ellipse(cloudX, cloudY, cloudW / 2, cloudH / 2, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.ellipse(cloudX - cloudW * 0.3, cloudY - cloudH * 0.2, cloudW * 0.4, cloudH * 0.6, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.ellipse(cloudX + cloudW * 0.3, cloudY - cloudH * 0.1, cloudW * 0.4, cloudH * 0.5, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                }
+
+                // 4. Mountains (layered)
+                const mountColors = [
+                    `hsl(${200 + rand()*30}, 40%, ${20 + rand()*20}%)`,
+                    `hsl(${210 + rand()*30}, 40%, ${30 + rand()*20}%)`,
+                    `hsl(${220 + rand()*30}, 30%, ${40 + rand()*20}%)`
+                ];
+                for (let layer = 0; layer < 3; layer++) {
+                    ctx.save();
+                    ctx.fillStyle = mountColors[layer % mountColors.length];
+                    ctx.shadowColor = 'rgba(0,0,0,0.2)';
+                    ctx.shadowBlur = 10;
+                    ctx.beginPath();
+                    const baseY = h * 0.55 + layer * 20;
+                    ctx.moveTo(0, baseY + 50);
+                    const peaks = 4 + rand() * 4;
+                    for (let i = 0; i <= peaks; i++) {
+                        const x = (i / peaks) * w;
+                        const y = baseY - (20 + rand() * 60) * (1 - Math.abs(i / peaks - 0.5) * 2);
+                        ctx.lineTo(x, y);
+                    }
+                    ctx.lineTo(w, baseY + 50);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.restore();
+                }
+
+                // 5. Forest / trees
+                for (let i = 0; i < 30 + rand() * 40; i++) {
+                    const tx = rand() * w;
+                    const ty = h * 0.5 + rand() * h * 0.3;
+                    const size = 15 + rand() * 35;
+                    const hue = 100 + rand() * 40;
+                    const sat = 50 + rand() * 30;
+                    const light = 30 + rand() * 30;
+                    ctx.save();
+                    ctx.shadowColor = 'rgba(0,0,0,0.3)';
+                    ctx.shadowBlur = 10;
+                    // trunk
+                    ctx.fillStyle = `hsl(30, 30%, ${20 + rand()*20}%)`;
+                    ctx.fillRect(tx - 3, ty, 6, size * 0.6);
+                    // canopy
+                    ctx.fillStyle = `hsl(${hue}, ${sat}%, ${light}%)`;
+                    ctx.beginPath();
+                    ctx.arc(tx, ty - size * 0.2, size * 0.5, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                }
+
+                // 6. Grass / meadow
+                ctx.save();
+                const grassGrad = ctx.createLinearGradient(0, h * 0.7, 0, h);
+                grassGrad.addColorStop(0, `hsl(${110 + rand()*20}, 60%, 40%)`);
+                grassGrad.addColorStop(1, `hsl(${120 + rand()*20}, 50%, 25%)`);
+                ctx.fillStyle = grassGrad;
+                ctx.shadowBlur = 5;
+                ctx.fillRect(0, h * 0.7, w, h * 0.3);
+                ctx.restore();
+
+                // 7. Flowers
+                for (let i = 0; i < 50 + rand() * 70; i++) {
+                    const fx = rand() * w;
+                    const fy = h * 0.7 + rand() * h * 0.25;
+                    const size = 2 + rand() * 5;
+                    const hue = rand() * 360;
+                    ctx.save();
+                    ctx.shadowBlur = 5;
+                    ctx.shadowColor = 'rgba(0,0,0,0.2)';
+                    ctx.fillStyle = `hsl(${hue}, 80%, 70%)`;
+                    ctx.beginPath();
+                    ctx.arc(fx, fy, size, 0, Math.PI * 2);
+                    ctx.fill();
+                    // center
+                    ctx.fillStyle = `hsl(${hue+30}, 60%, 50%)`;
+                    ctx.beginPath();
+                    ctx.arc(fx, fy, size * 0.3, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                }
+
+                // 8. River or lake (optional, with randomness)
+                if (rand() > 0.4) {
+                    ctx.save();
+                    const waterHue = 190 + rand() * 30;
+                    const waterLight = 30 + rand() * 30;
+                    ctx.fillStyle = `hsla(${waterHue}, 60%, ${waterLight}%, 0.5)`;
+                    ctx.shadowBlur = 20;
+                    ctx.shadowColor = 'rgba(0,0,0,0.2)';
+                    // wavy river
+                    ctx.beginPath();
+                    const startX = rand() * w * 0.3;
+                    const endX = rand() * w * 0.3 + w * 0.4;
+                    const yBase = h * 0.6 + rand() * h * 0.2;
+                    ctx.moveTo(startX, yBase);
+                    for (let x = startX; x < endX; x += 10) {
+                        const wave = Math.sin(x * 0.02 + seed) * 10;
+                        ctx.lineTo(x, yBase + wave + 10);
+                    }
+                    ctx.lineTo(endX, yBase + 30 + rand() * 20);
+                    for (let x = endX; x > startX; x -= 10) {
+                        const wave = Math.sin(x * 0.02 + seed + 1) * 10;
+                        ctx.lineTo(x, yBase + wave - 10);
+                    }
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.restore();
+                }
+
+                // 9. Some mist / fog in the distance
+                ctx.save();
+                ctx.globalAlpha = 0.1 + rand() * 0.1;
+                ctx.fillStyle = `hsl(0, 0%, ${90 + rand()*10}%)`;
+                ctx.shadowBlur = 80;
+                ctx.shadowColor = 'rgba(255,255,255,0.1)';
+                ctx.beginPath();
+                ctx.ellipse(w * 0.5, h * 0.3 + rand() * 50, w * 0.8, 60, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+
+                // 10. Stars (if night-ish)
+                if (celestial === 'moon' || rand() > 0.6) {
+                    for (let i = 0; i < 40 + rand() * 60; i++) {
+                        const sx = rand() * w;
+                        const sy = rand() * h * 0.5;
+                        const size = 1 + rand() * 2;
+                        ctx.save();
+                        ctx.globalAlpha = 0.3 + rand() * 0.5;
+                        ctx.fillStyle = '#fff';
+                        ctx.shadowBlur = 10;
+                        ctx.shadowColor = 'rgba(255,255,255,0.5)';
+                        ctx.beginPath();
+                        ctx.arc(sx, sy, size, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.restore();
+                    }
+                }
+            }
+
+            // ─── Generate image with poetry ───
+            function generateArt(index) {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const w = 1200,
+                    h = 800;
+                canvas.width = w;
+                canvas.height = h;
+
+                // Draw nature background
+                drawNature(ctx, w, h, index + 1000);
+
+                // ─── Overlay Poetry ───
+                const poem = poems[index % poems.length];
+                ctx.save();
+                ctx.shadowColor = 'rgba(0,0,0,0.8)';
+                ctx.shadowBlur = 30;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+
+                // Title
+                ctx.font = 'bold 28px "Georgia", serif';
+                ctx.fillStyle = 'rgba(255,255,255,0.25)';
+                ctx.fillText('~ nature ~', w / 2, 55);
+
+                // Poem lines
+                const lines = poem.split('\n');
+                const fontSize = Math.min(40, Math.floor(700 / lines.length));
+                ctx.font = `italic ${fontSize}px "Georgia", serif`;
+                ctx.fillStyle = 'rgba(255,255,255,0.92)';
+                ctx.shadowBlur = 30;
+                ctx.shadowColor = 'rgba(0,0,0,0.9)';
+                const lineHeight = fontSize * 1.4;
+                const startY = h / 2 - (lines.length - 1) * lineHeight / 2 + 30;
+
+                lines.forEach((line, i) => {
+                    ctx.globalAlpha = 0.85 + 0.15 * (i / lines.length);
+                    ctx.fillText(line.trim(), w / 2, startY + i * lineHeight);
+                });
+
+                // Signature
+                ctx.globalAlpha = 0.2;
+                ctx.font = '16px "Georgia", serif';
+                ctx.fillStyle = 'white';
+                ctx.shadowBlur = 5;
+                ctx.fillText('— sorrow in the wind —', w / 2, h - 35);
+                ctx.restore();
+
+                return canvas.toDataURL('image/jpeg', 0.92);
+            }
+
+            // ─── Cache ───
+            const imageCache = new Map();
+
+            function getImage(index) {
+                if (imageCache.has(index)) {
+                    return imageCache.get(index);
+                }
+                const dataUrl = generateArt(index);
+                imageCache.set(index, dataUrl);
+                return dataUrl;
+            }
+
+            // ─── Slide management ───
+            function setSlideContent(slide, index) {
+                const img = slide.querySelector('img');
+                if (index >= 0 && index < TOTAL) {
+                    const dataUrl = getImage(index);
+                    img.src = dataUrl;
+                    img.alt = `Nature ${index+1} of ${TOTAL}`;
+                    slide.classList.remove('loading');
+                } else {
+                    img.src = '';
+                    slide.classList.remove('loading');
+                }
+            }
+
+            function createSlides() {
+                const fragment = document.createDocumentFragment();
+                for (let i = 0; i < 3; i++) {
+                    const slide = document.createElement('div');
+                    slide.className = 'slide loading';
+                    const img = document.createElement('img');
+                    img.loading = 'lazy';
+                    slide.appendChild(img);
+                    fragment.appendChild(slide);
+                    slides.push(slide);
+                }
+                gallery.prepend(fragment);
+                setSlideContent(slides[0], 0);
+                setSlideContent(slides[1], 1);
+                setSlideContent(slides[2], 2);
+                slides[0].classList.add('active');
+                slides[0].classList.remove('loading');
+                activePhysicalIdx = 0;
+                currentIndex = 0;
+                updateCounter(0);
+                updateProgress(0);
+            }
+
+            function updateCounter(index) {
+                currentNum.textContent = String(index + 1);
+            }
+
+            function updateProgress(index) {
+                const pct = ((index + 1) / TOTAL) * 100;
+                progressBar.style.width = pct + '%';
+            }
+
+            // ─── Navigation ───
+            function goTo(newIndex) {
+                if (isTransitioning) return;
+                if (newIndex < 0 || newIndex >= TOTAL) return;
+                if (newIndex === currentIndex) return;
+                isTransitioning = true;
+                const oldSlide = slides[activePhysicalIdx];
+                const newPhysicalIdx = (activePhysicalIdx + 1) % 3;
+                const newSlide = slides[newPhysicalIdx];
+                setSlideContent(newSlide, newIndex);
+                oldSlide.classList.remove('active');
+                newSlide.classList.add('active');
+                activePhysicalIdx = newPhysicalIdx;
+                currentIndex = newIndex;
+                updateCounter(newIndex);
+                updateProgress(newIndex);
+                // Preload adjacent
+                const prevIdx = newIndex - 1;
+                const nextIdx = newIndex + 1;
+                const inA = (activePhysicalIdx + 1) % 3;
+                const inB = (activePhysicalIdx + 2) % 3;
+                if (prevIdx >= 0 && prevIdx < TOTAL) setSlideContent(slides[inA], prevIdx);
+                else setSlideContent(slides[inA], newIndex);
+                if (nextIdx >= 0 && nextIdx < TOTAL) setSlideContent(slides[inB], nextIdx);
+                else setSlideContent(slides[inB], newIndex);
+                setTimeout(() => { isTransitioning = false; }, 850);
+            }
+
+            function nextSlide() {
+                if (isTransitioning) return;
+                goTo((currentIndex + 1) % TOTAL);
+            }
+
+            function prevSlide() {
+                if (isTransitioning) return;
+                goTo((currentIndex - 1 + TOTAL) % TOTAL);
+            }
+
+            // ─── Autoplay ───
+            function startAutoplay() {
+                if (autoplayTimer) clearInterval(autoplayTimer);
+                autoplayTimer = setInterval(nextSlide, AUTOPLAY_DELAY);
+                isPlaying = true;
+                autoplayBtn.classList.add('playing');
+            }
+
+            function stopAutoplay() {
+                if (autoplayTimer) {
+                    clearInterval(autoplayTimer);
+                    autoplayTimer = null;
+                }
+                isPlaying = false;
+                autoplayBtn.classList.remove('playing');
+            }
+
+            function toggleAutoplay() {
+                if (isPlaying) stopAutoplay();
+                else startAutoplay();
+            }
+
+            function resetAutoplay() {
+                if (isPlaying) {
+                    stopAutoplay();
+                    startAutoplay();
+                }
+            }
+
+            // ─── Keyboard & Touch ───
+            function handleKeydown(e) {
+                if (e.key === 'ArrowLeft') { e.preventDefault();
+                    prevSlide();
+                    resetAutoplay(); } else if (e.key === 'ArrowRight') { e.preventDefault();
+                    nextSlide();
+                    resetAutoplay(); } else if (e.key === ' ' || e.key === 'Space') { e.preventDefault();
+                    toggleAutoplay(); }
+            }
+
+            let touchStartX = 0,
+                touchStartY = 0,
+                isSwiping = false;
+
+            function handleTouchStart(e) {
+                const touch = e.touches[0];
+                touchStartX = touch.clientX;
+                touchStartY = touch.clientY;
+                isSwiping = true;
+            }
+
+            function handleTouchEnd(e) {
+                if (!isSwiping) return;
+                isSwiping = false;
+                const touch = e.changedTouches[0];
+                const dx = touch.clientX - touchStartX;
+                const dy = touch.clientY - touchStartY;
+                if (Math.abs(dx) < 50) return;
+                if (Math.abs(dx) < Math.abs(dy) * 0.6) return;
+                if (dx < 0) { nextSlide();
+                    resetAutoplay(); } else { prevSlide();
+                    resetAutoplay(); }
+            }
+
+            // ─── roundRect polyfill ───
+            if (!CanvasRenderingContext2D.prototype.roundRect) {
+                CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, radii) {
+                    const r = typeof radii === 'number' ? radii : (radii || 0);
+                    this.moveTo(x + r, y);
+                    this.lineTo(x + w - r, y);
+                    this.quadraticCurveTo(x + w, y, x + w, y + r);
+                    this.lineTo(x + w, y + h - r);
+                    this.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+                    this.lineTo(x + r, y + h);
+                    this.quadraticCurveTo(x, y + h, x, y + h - r);
+                    this.lineTo(x, y + r);
+                    this.quadraticCurveTo(x, y, x + r, y);
+                    this.closePath();
+                    return this;
+                };
+            }
+
+            // ─── Init ───
+            function init() {
+                createSlides();
+                startAutoplay();
+                prevBtn.addEventListener('click', () => { prevSlide();
+                    resetAutoplay(); });
+                nextBtn.addEventListener('click', () => { nextSlide();
+                    resetAutoplay(); });
+                autoplayBtn.addEventListener('click', toggleAutoplay);
+                document.addEventListener('keydown', handleKeydown);
+                gallery.addEventListener('touchstart', handleTouchStart, { passive: true });
+                gallery.addEventListener('touchend', handleTouchEnd, { passive: true });
+                setTimeout(() => hint.classList.add('hidden'), 6000);
+                document.addEventListener('visibilitychange', () => {
+                    if (document.hidden && isPlaying) stopAutoplay();
+                });
+                console.log(`✨ Pure Nature Gallery · ${TOTAL} beautiful scenes`);
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                init();
+            }
+
+        })();
+    </script>
+
+</body>
+</html>
