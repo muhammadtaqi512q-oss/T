@@ -1,53 +1,52 @@
-name: Build Clean APK with Icon
+name: Build and Deploy Nexura Flask App
 
 on:
   push:
-    branches: [ main ]
-  workflow_dispatch:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
 
 jobs:
-  build:
+  build-and-deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Setup Java JDK
-        uses: actions/setup-java@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          distribution: 'zulu'
-          java-version: '17'
+          python-version: '3.10'
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-
-      - name: Install Cordova & Build APK with Icon
+      - name: Install Dependencies
         run: |
-          npm install -g cordova
-          
-          # 1. Create Cordova project
-          cordova create app com.joymix.nexura "JOYMIX"
-          
-          # 2. Copy ALL HTML and web files to www folder
-          cp -r *.html *.png *.jpg *.jpeg *.css *.js app/www/ 2>/dev/null || true
-          # cp -r css js images app/www/ 2>/dev/null || true
-          
-          # 3. Add Custom Icon to Config if icon.png exists
-          if [ -f "icon.png" ]; then
-            cp icon.png app/www/icon.png
-            sed -i '/<\/widget>/i \    <icon src="www/icon.png" />' app/config.xml
-          fi
-          
-          # 4. Add Android Platform & Build
-          cd app
-          cordova platform add android
-          cordova build android --debug
+          python -m pip install --upgrade pip
+          pip install flask
 
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
+      - name: Build Static Files via Flask
+        run: |
+          python build.py
+
+      - name: Setup GitHub Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload Artifacts
+        uses: actions/upload-pages-artifact@v3
         with:
-          name: VIBE-APP-APK
-          path: app/platforms/android/app/build/outputs/apk/debug/app-debug.apk
+          path: 'dist'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
