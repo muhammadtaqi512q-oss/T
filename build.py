@@ -1,5 +1,5 @@
 import os
-from app import app
+from app import app 
 
 # Output directory create karein
 os.makedirs("dist/api", exist_ok=True)
