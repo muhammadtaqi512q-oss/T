@@ -6,7 +6,7 @@ os.makedirs("dist/api", exist_ok=True)
 
 with app.test_client() as client:
     # Get Main HTML
-    res_home = client.get('/')
+    res_home = client.get('/') 
     with open("dist/index.html", "w", encoding="utf-8") as f:
         f.write(res_home.data.decode('utf-8'))
 
