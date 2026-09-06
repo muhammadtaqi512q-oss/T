@@ -3,596 +3,570 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VIBE - Created by Muhammad Taqi</title>
-    <link rel="icon" type="image/png" href="icon.png">
-    <script src="cordova.js"></script>
-    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <title>JoyMix - Created by Muhammad Taqi</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Helvetica, Arial, sans-serif; }
-        body { background: #f0f2f5; color: #111b21; height: 100vh; display: flex; justify-content: center; align-items: center; }
-        .clickable-icon { cursor: pointer; transition: transform 0.2s; }
-        .clickable-icon:hover { transform: scale(1.05); }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
+        }
 
-        .auth-container { width: 100%; max-width: 400px; background: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: center; }
-        .auth-screen { display: none; }
-        .auth-screen.active { display: block; }
-        .app-logo { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; margin-bottom: 12px; }
-        .auth-container h1 { color: #00a884; font-size: 28px; font-weight: 700; letter-spacing: 1px; }
-        .auth-container .subtitle { font-size: 13px; color: #667781; margin-bottom: 25px; font-weight: 600; }
-        .auth-input { width: 100%; padding: 12px 14px; margin-bottom: 15px; border: 1px solid #e9edef; border-radius: 8px; font-size: 14px; background: #f8f9fa; outline: none; }
-        .auth-input:focus { border-color: #00a884; background: #fff; }
-        .btn-primary { width: 100%; padding: 12px; background: #00a884; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 15px; margin-bottom: 10px; }
-        .btn-primary:hover { background: #008f6f; }
-        .btn-secondary { background: #e9edef; color: #111b21; }
-        .btn-secondary:hover { background: #d1d7db; }
-        .auth-link { color: #00a884; cursor: pointer; font-size: 14px; }
-        .auth-link:hover { text-decoration: underline; }
-        .credentials-box { background: #f0f2f5; padding: 15px; border-radius: 8px; margin: 15px 0; text-align: left; }
-        .credentials-box p { margin: 5px 0; font-size: 14px; }
-        .credentials-box span { font-weight: 600; color: #111b21; }
+        body {
+            background-color: #0f0f0f;
+            color: #f1f1f1;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
 
-        .app-layout { width: 100vw; height: 100vh; display: flex; background: #fff; overflow: hidden; position: relative; }
-        .sidebar { width: 380px; border-right: 1px solid #e9edef; display: flex; flex-direction: column; background: #ffffff; flex-shrink: 0; }
-        .sidebar-header { height: 60px; background: #f0f2f5; padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e9edef; }
-        .user-brand { display: flex; align-items: center; gap: 10px; }
-        .header-logo { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; }
-        .profile-info { display: flex; flex-direction: column; }
-        .profile-name { font-weight: 700; font-size: 15px; color: #111b21; }
-        .profile-id { font-size: 11px; color: #667781; }
-        .header-actions { display: flex; gap: 18px; color: #54656f; font-size: 18px; cursor: pointer; }
-        .header-actions i:hover { color: #00a884; }
+        /* Mode Selection Screen */
+        #selector-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            width: 100vw;
+            background: radial-gradient(circle at center, #1f1f1f 0%, #0f0f0f 100%);
+            text-align: center;
+            padding: 20px;
+        }
 
-        .search-box { padding: 8px 12px; background: #ffffff; border-bottom: 1px solid #e9edef; }
-        .search-input { width: 100%; padding: 8px 12px 8px 35px; border-radius: 8px; border: none; background: #f0f2f5; font-size: 13px; outline: none; }
-        .search-wrapper { position: relative; }
-        .search-wrapper i { position: absolute; left: 12px; top: 10px; color: #54656f; font-size: 12px; }
+        .brand-title {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+            color: #ffffff;
+            letter-spacing: -1px;
+        }
 
-        .contacts-list { flex: 1; overflow-y: auto; }
-        .contact-item { display: flex; align-items: center; padding: 12px 16px; cursor: pointer; border-bottom: 1px solid #f5f6f6; transition: background 0.2s; }
-        .contact-item:hover, .contact-item.active { background: #f0f2f5; }
-        .avatar { width: 42px; height: 42px; border-radius: 50%; background: #00a884; color: white; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 16px; margin-right: 12px; flex-shrink: 0; overflow: hidden; }
-        .contact-details { flex: 1; overflow: hidden; }
-        .contact-title { display: flex; justify-content: space-between; font-size: 14px; font-weight: 600; color: #111b21; }
-        .last-msg { font-size: 12px; color: #667781; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+        .brand-title span {
+            color: #ff0000;
+        }
 
-        .main-chat { flex: 1; display: flex; flex-direction: column; background: #efeae2; position: relative; width: 100%; }
-        .chat-header { height: 60px; background: #f0f2f5; padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e9edef; }
-        .chat-header-user { display: flex; align-items: center; gap: 12px; }
-        .back-btn { font-size: 18px; color: #54656f; cursor: pointer; padding: 5px; }
-        .back-btn:hover { color: #00a884; }
-        .chat-header-actions { display: flex; gap: 10px; }
-        .chat-action-btn { background: #ea4335; color: white; border: none; padding: 7px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; }
-        .chat-action-btn.secondary { background: #54656f; }
+        .creator-tag {
+            font-size: 0.95rem;
+            color: #aaa;
+            margin-bottom: 40px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 6px 16px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
 
-        .chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
-        .msg-bubble { max-width: 65%; padding: 8px 12px; border-radius: 8px; font-size: 14px; line-height: 19px; position: relative; word-wrap: break-word; box-shadow: 0 1px 0.5px rgba(11,20,26,0.13); }
-        .msg-bubble.me { background: #d9fdd3; align-self: flex-end; border-top-right-radius: 0; }
-        .msg-bubble.them { background: #ffffff; align-self: flex-start; border-top-left-radius: 0; }
-        .msg-bubble img, .msg-bubble video, .msg-bubble audio { max-width: 100%; max-height: 250px; border-radius: 8px; margin-bottom: 4px; display: block; }
-        .msg-bubble audio { outline: none; margin-top: 4px; min-width: 230px; }
-        .msg-time { font-size: 10px; color: #667781; text-align: right; margin-top: 2px; }
+        .btn-container {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
 
-        .chat-footer { height: 62px; background: #f0f2f5; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
-        .message-input { flex: 1; padding: 11px 16px; border: none; border-radius: 8px; font-size: 14px; outline: none; background: #ffffff; }
-        .media-btn { color: #54656f; font-size: 20px; cursor: pointer; padding: 5px; }
-        .send-btn { background: #00a884; color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; flex-shrink: 0; }
+        .mode-btn {
+            background: #181818;
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 20px 40px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 180px;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+        }
 
-        .mic-btn { background: #ffffff; color: #54656f; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; flex-shrink: 0; font-size: 18px; transition: all 0.2s; }
-        .mic-btn.recording { background: #ea4335; color: white; animation: pulse 1.2s infinite; }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.08); } 100% { transform: scale(1); } }
-        .recording-status { display: none; flex: 1; align-items: center; gap: 10px; color: #ea4335; font-size: 14px; font-weight: 600; padding: 0 10px; }
+        .mode-btn:hover {
+            transform: translateY(-50px);
+            border-color: #ff0000;
+            box-shadow: 0 8px 25px rgba(255, 0, 0, 0.3);
+        }
 
-        .empty-chat { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #f0f2f5; color: #667781; text-align: center; }
-        .empty-chat img { width: 100px; height: 100px; margin-bottom: 15px; border-radius: 50%; }
+        .mode-btn.online-btn:hover {
+            background: #ff0000;
+        }
 
-        .app-layout.full-chat .sidebar { display: none; }
-        .app-layout.full-chat .main-chat { display: flex; width: 100%; }
+        .mode-btn.offline-btn:hover {
+            background: #333333;
+        }
 
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(11,20,26,0.4); justify-content: center; align-items: center; z-index: 1000; }
-        .modal-content { background: #ffffff; width: 360px; padding: 24px; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.15); }
-        .modal-header { font-size: 18px; font-weight: 600; color: #111b21; margin-bottom: 15px; }
+        /* Fullscreen Containers */
+        #online-frame-container, #offline-container {
+            display: none;
+            width: 100vw;
+            height: 100vh;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 10;
+        }
+
+        iframe.full-page-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Back to Menu Button for Online Frame */
+        .back-to-menu {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(255, 0, 0, 0.85);
+            color: #fff;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 30px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 9999;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+            transition: transform 0.2s;
+        }
+
+        .back-to-menu:hover {
+            transform: scale(1.05);
+            background: #ff0000;
+        }
+
+        /* Offline Template Custom Internal Styles */
+        :root {
+            --bg-color: #0f0f0f;
+            --card-bg: #181818;
+            --text-color: #f1f1f1;
+            --subtext-color: #aaa;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --chip-bg: rgba(255, 255, 255, 0.1);
+            --chip-hover-bg: #f1f1f1;
+            --chip-hover-text: #0f0f0f;
+            --shadow-color: rgba(0, 0, 0, 0.6);
+        }
+
+        body.light-theme {
+            --bg-color: #ffffff;
+            --card-bg: #f9f9f9;
+            --text-color: #0f0f0f;
+            --subtext-color: #606060;
+            --border-color: rgba(0, 0, 0, 0.1);
+            --chip-bg: rgba(0, 0, 0, 0.05);
+            --chip-hover-bg: #0f0f0f;
+            --chip-hover-text: #ffffff;
+            --shadow-color: rgba(0, 0, 0, 0.15);
+        }
+
+        #offline-container {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            overflow-y: auto;
+        }
+
+        header {
+            width: 100%;
+            height: 60px;
+            background: var(--bg-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .logo-box {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-color);
+            letter-spacing: -0.5px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            color: #ff0000;
+            font-size: 26px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .theme-toggle-btn {
+            background: var(--chip-bg);
+            color: var(--text-color);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 1px solid var(--border-color);
+            font-size: 18px;
+        }
+
+        .creator-link {
+            background: var(--chip-bg);
+            color: var(--text-color);
+            padding: 8px 16px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .creator-link:hover {
+            background: #ff0000;
+            color: #fff;
+            border-color: #ff0000;
+        }
+
+        .category-bar {
+            width: 100%;
+            padding: 12px 20px;
+            background: var(--bg-color);
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            position: sticky;
+            top: 60px;
+            z-index: 90;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .category-bar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .chip {
+            background: var(--chip-bg);
+            color: var(--text-color);
+            padding: 8px 18px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            white-space: nowrap;
+            cursor: pointer;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .chip.active, .chip:hover {
+            background: var(--chip-hover-bg);
+            color: var(--chip-hover-text);
+        }
+
+        main {
+            padding: 20px;
+            max-width: 1600px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .grid-feed {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            overflow: hidden;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--border-color);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px var(--shadow-color);
+        }
+
+        .thumbnail {
+            width: 100%;
+            height: 180px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(128, 128, 128, 0.2);
+        }
+
+        .thumbnail i.play-icon {
+            font-size: 48px;
+            color: #ff0000;
+            filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5));
+        }
+
+        .badge {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.85);
+            color: #fff;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .card-details {
+            padding: 14px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--chip-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: var(--text-color);
+            flex-shrink: 0;
+        }
+
+        .info h3 {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-color);
+            line-height: 1.3;
+            margin-bottom: 4px;
+        }
+
+        .info p {
+            font-size: 13px;
+            color: var(--subtext-color);
+        }
+
+        .player-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .player-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .controls-overlay {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            gap: 12px;
+            z-index: 1001;
+        }
+
+        .action-btn {
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+            background: rgba(0, 0, 0, 0.7);
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+        }
+
+        .action-btn:active {
+            transform: scale(0.9);
+            background: #ff0000;
+        }
     </style>
 </head>
 <body>
-    <div class="auth-container auth-screen active" id="selectionScreen">
-        <a href="https://taqi.oneapp.dev" target="_blank">
-            <img src="icon.png" alt="VIBE Icon" class="app-logo clickable-icon">
-        </a>
-        <h1>VIBE</h1>
-        <p class="subtitle">CREATED BY MUHAMMAD TAQI</p>
-        <button class="btn-primary" onclick="showCreateAccount()">Create New Account</button>
-        <button class="btn-primary btn-secondary" onclick="showLogin()">Login</button>
+
+    <div id="selector-screen">
+        <h1 class="brand-title">Joy<span>Mix</span></h1>
+        <div class="creator-tag"><i class="fa-solid fa-code"></i> Created by Muhammad Taqi</div>
+        
+        <div class="btn-container">
+            <button class="mode-btn online-btn" onclick="launchOnline()">
+                <i class="fa-solid fa-globe"></i> Online
+            </button>
+            <button class="mode-btn offline-btn" onclick="launchOffline()">
+                <i class="fa-solid fa-wifi-slash"></i> Offline
+            </button>
+        </div>
     </div>
 
-    <div class="auth-container auth-screen" id="createAccountScreen">
-        <a href="https://taqi.oneapp.dev" target="_blank">
-            <img src="icon.png" alt="VIBE Icon" class="app-logo clickable-icon">
-        </a>
-        <h1>Create Account</h1>
-        <p class="subtitle">Enter your name to get a random ID and password</p>
-        <div id="createAccountForm">
-            <input type="text" id="createNameInput" class="auth-input" placeholder="Your Name" maxlength="20">
-            <button class="btn-primary" onclick="createAccount()">Create Account</button>
-        </div>
-        <div id="accountCreatedInfo" style="display: none;">
-            <div class="credentials-box">
-                <p>Your ID: <span id="generatedIdDisplay"></span></p>
-                <p>Your Password: <span id="generatedPasswordDisplay"></span></p>
-            </div>
-            <button class="btn-primary" onclick="continueToApp()">Continue to Chat</button>
-        </div>
-        <p class="auth-link" onclick="showSelection()">← Back</p>
+    <div id="online-frame-container">
+        <button class="back-to-menu" onclick="resetToMenu()"><i class="fa-solid fa-house"></i> Main Menu</button>
+        <iframe id="online-iframe" class="full-page-frame" src="" allowfullscreen></iframe>
     </div>
 
-    <div class="auth-container auth-screen" id="loginScreen">
-        <a href="https://taqi.oneapp.dev" target="_blank">
-            <img src="icon.png" alt="VIBE Icon" class="app-logo clickable-icon">
-        </a>
-        <h1>Login</h1>
-        <p class="subtitle">Enter your credentials</p>
-        <input type="text" id="loginNameInput" class="auth-input" placeholder="Name (any)" maxlength="20">
-        <input type="text" id="loginIdInput" class="auth-input" placeholder="ID" maxlength="25">
-        <input type="password" id="loginPasswordInput" class="auth-input" placeholder="Password">
-        <button class="btn-primary" onclick="login()">Login</button>
-        <p class="auth-link" onclick="showSelection()">← Back</p>
-    </div>
-
-    <div class="app-layout" id="appLayout" style="display: none;">
-        <div class="sidebar">
-            <div class="sidebar-header">
-                <div class="user-brand">
-                    <a href="https://taqi.oneapp.dev" target="_blank">
-                        <img src="icon.png" class="header-logo clickable-icon" alt="VIBE Icon">
-                    </a>
-                    <div class="profile-info">
-                        <span class="profile-name" id="myProfileName">-</span>
-                        <span class="profile-id" id="myProfileId">ID: -</span>
-                    </div>
+    <div id="offline-container">
+        <header>
+            <a href="#" onclick="resetToMenu()" class="logo-box">
+                <i class="fa-brands fa-youtube logo-icon"></i> JoyMix
+            </a>
+            <div class="header-actions">
+                <div class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
+                    <i class="fa-solid fa-moon" id="themeIcon"></i>
                 </div>
-                <div class="header-actions">
-                    <i class="fa-solid fa-gear" onclick="showSettings()"></i>
-                    <i class="fa-solid fa-user-plus" onclick="openModal()"></i>
-                </div>
-            </div>
-
-            <div class="search-box">
-                <div class="search-wrapper">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                    <input type="text" class="search-input" placeholder="Search or start new chat">
-                </div>
-            </div>
-
-            <div class="contacts-list" id="contactsContainer"></div>
-        </div>
-
-        <div class="main-chat">
-            <div id="emptyChatView" class="empty-chat">
-                <a href="https://taqi.oneapp.dev" target="_blank">
-                    <img src="icon.png" alt="VIBE Icon" class="clickable-icon">
+                <a href="#" onclick="resetToMenu()" class="creator-link">
+                    <i class="fa-solid fa-circle-user"></i> Created by Muhammad Taqi
                 </a>
-                <h2>VIBE Web</h2>
-                <p style="margin-top: 8px; font-size: 14px;">Select a contact or click '+' to add a friend using their ID.</p>
             </div>
+        </header>
 
-            <div id="activeChatView" style="display: none; height: 100%; flex-direction: column;">
-                <div class="chat-header">
-                    <div class="chat-header-user">
-                        <i class="fa-solid fa-arrow-left back-btn" onclick="goBackToContacts()"></i>
-                        <div class="avatar" id="activeAvatar">?</div>
-                        <div>
-                            <div class="profile-name" id="activeContactName">Friend</div>
-                            <div class="profile-id" id="activeContactId">ID: -</div>
-                        </div>
-                    </div>
-                    <div class="chat-header-actions">
-                        <button class="chat-action-btn secondary" onclick="deleteChat()"><i class="fa-solid fa-broom"></i> Clear Chat</button>
-                        <button class="chat-action-btn" onclick="deleteContact()"><i class="fa-solid fa-trash"></i> Delete Contact</button>
-                    </div>
-                </div>
-
-                <div class="chat-messages" id="chatMessages"></div>
-                <div class="chat-footer">
-                    <label for="fileInput" class="media-btn"><i class="fa-solid fa-paperclip"></i></label>
-                    <input type="file" id="fileInput" accept="image/*,video/*" style="display: none;" onchange="handleFileSelect(event)">
-                    
-                    <input type="text" id="messageInput" class="message-input" placeholder="Type a message..." onkeypress="handleKeyPress(event)">
-                    
-                    <div id="recordingStatus" class="recording-status">
-                        <i class="fa-solid fa-circle"></i> <span id="recordingTime">Recording 0s...</span>
-                    </div>
-
-                    <button id="micBtn" class="mic-btn" onclick="toggleVoiceRecording()">
-                        <i class="fa-solid fa-microphone"></i>
-                    </button>
-
-                    <button class="send-btn" onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i></button>
-                </div>
-            </div>
+        <div class="category-bar">
+            <button class="chip active" onclick="filterCategory('all', this)"><i class="fa-solid fa-house"></i> All</button>
+            <button class="chip" onclick="filterCategory('games', this)"><i class="fa-solid fa-gamepad"></i> Games</button>
+            <button class="chip" onclick="filterCategory('images', this)"><i class="fa-solid fa-image"></i> Images</button>
+            <button class="chip" onclick="filterCategory('poetry', this)"><i class="fa-solid fa-feather"></i> Poetry</button>
         </div>
-    </div>
 
-    <div class="modal" id="addContactModal">
-        <div class="modal-content">
-            <div class="modal-header">Add New Contact</div>
-            <input type="text" id="friendNameInput" class="auth-input" placeholder="Contact Name" maxlength="20">
-            <input type="text" id="friendIdInput" class="auth-input" placeholder="Enter 12-25 Digit ID" maxlength="25">
-            <div style="display: flex; gap: 10px; margin-top: 10px;">
-                <button class="btn-primary" style="background: #e9edef; color: #111b21;" onclick="closeModal()">Cancel</button>
-                <button class="btn-primary" onclick="saveContact()">Add & Save</button>
-            </div>
-        </div>
-    </div>
+        <main>
+            <div class="grid-feed" id="feedGrid"></div>
+        </main>
 
-    <div class="modal" id="settingsModal">
-        <div class="modal-content">
-            <div class="modal-header">Account Settings</div>
-            <p style="font-size: 14px; margin-bottom: 10px;">Your current password is:</p>
-            <div class="credentials-box">
-                <p><span id="currentPasswordDisplay"></span></p>
+        <div class="player-modal" id="playerModal">
+            <div class="player-container">
+                <div class="controls-overlay">
+                    <span class="action-btn" onclick="closePlayer()" title="Close">
+                        <i class="fa-solid fa-xmark"></i>
+                    </span>
+                </div>
+                <iframe id="mainFrame" src="" allow="autoplay; encrypted-media" allowfullscreen></iframe>
             </div>
-            <button class="btn-primary" onclick="closeSettings()">Close</button>
         </div>
     </div>
 
     <script>
-        let currentUser = null;
-        let peer = null;
-        let connections = {};
-        let contacts = [];
-        let messagesDB = {};
-        let activeFriendId = null;
-
-        let mediaRecorder = null;
-        let audioChunks = [];
-        let isRecording = false;
-        let recTimer = null;
-        let recSeconds = 0;
-
-        document.addEventListener('deviceready', requestAndroidMicPermissions, false);
-
-        function requestAndroidMicPermissions() {
-            if (window.cordova && cordova.plugins && cordova.plugins.permissions) {
-                var permissions = cordova.plugins.permissions;
-                permissions.requestPermission(permissions.RECORD_AUDIO, function(status) {
-                    if (!status.hasPermission) console.warn("Mic permission denied");
-                }, null);
-            }
+        // Navigation Logic
+        function launchOnline() {
+            document.getElementById('selector-screen').style.display = 'none';
+            document.getElementById('online-frame-container').style.display = 'block';
+            document.getElementById('online-iframe').src = 'https://joymix1.oneapp.dev/';
         }
 
-        window.onload = function() {
-            const savedUser = localStorage.getItem('vibe_user');
-            const savedContacts = localStorage.getItem('vibe_contacts');
-            const savedMessages = localStorage.getItem('vibe_messages');
-
-            if (savedContacts) contacts = JSON.parse(savedContacts);
-            if (savedMessages) messagesDB = JSON.parse(savedMessages);
-
-            if (savedUser) {
-                currentUser = JSON.parse(savedUser);
-                initPeer();
-            } else {
-                showSelection();
-            }
-        };
-
-        function showSelection() {
-            document.querySelectorAll('.auth-screen').forEach(s => s.classList.remove('active'));
-            document.getElementById('selectionScreen').classList.add('active');
+        function launchOffline() {
+            document.getElementById('selector-screen').style.display = 'none';
+            document.getElementById('offline-container').style.display = 'block';
+            loadFeed();
         }
 
-        function showCreateAccount() {
-            document.querySelectorAll('.auth-screen').forEach(s => s.classList.remove('active'));
-            document.getElementById('createAccountScreen').classList.add('active');
-            document.getElementById('createAccountForm').style.display = 'block';
-            document.getElementById('accountCreatedInfo').style.display = 'none';
+        function resetToMenu() {
+            document.getElementById('online-iframe').src = '';
+            document.getElementById('online-frame-container').style.display = 'none';
+            document.getElementById('offline-container').style.display = 'none';
+            document.getElementById('selector-screen').style.display = 'flex';
         }
 
-        function showLogin() {
-            document.querySelectorAll('.auth-screen').forEach(s => s.classList.remove('active'));
-            document.getElementById('loginScreen').classList.add('active');
+        // Static Local Assets & Games Data
+        const staticItems = [
+            { type: 'games', title: '50 Game Classic', path: '50.html', icon: 'fa-trophy', bg: 'fa-gamepad' },
+            { type: 'games', title: 'Flappy Bird Arcade', path: 'Flappy-Bird.html', icon: 'fa-dove', bg: 'fa-crow' },
+            { type: 'games', title: 'Hill Climb Racing', path: 'Hill-Climb.html', icon: 'fa-truck', bg: 'fa-car' },
+            { type: 'games', title: 'Dino Runner v1', path: 'diano1.html', icon: 'fa-paw', bg: 'fa-dragon' },
+            { type: 'games', title: 'Dino Runner v2', path: 'diano2.html', icon: 'fa-dragon', bg: 'fa-dragon' },
+            { type: 'games', title: 'Ludo Star Online', path: 'ludo.html', icon: 'fa-dice-four', bg: 'fa-dice' },
+            { type: 'games', title: 'Stickman Hero', path: 'stickman.html', icon: 'fa-user-ninja', bg: 'fa-person-running' },
+            { type: 'games', title: 'Rock Paper Scissors', path: 'stone-paper-seasor.html', icon: 'fa-hand-back-fist', bg: 'fa-hand' },
+            { type: 'games', title: 'Tic Tac Toe Pro v2', path: 'tic-cros-2.html', icon: 'fa-xmark', bg: 'fa-hashtag' },
+            { type: 'games', title: 'Tic Tac Toe Classic', path: 'tic-cross.html', icon: 'fa-grip-lines', bg: 'fa-table-cells' },
+            { type: 'poetry', title: 'Poetry Cards & Quotes', path: 'poetry.html', icon: 'fa-book-open', bg: 'fa-feather' },
+            { type: 'images', title: 'Offline Image Storage', path: 'offline.html', icon: 'fa-box-archive', bg: 'fa-hard-drive' }
+        ];
+
+        // Theme Switcher
+        function toggleTheme() {
+            const body = document.body;
+            const icon = document.getElementById('themeIcon');
+            body.classList.toggle('light-theme');
+            icon.className = body.classList.contains('light-theme') ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
         }
 
-        function hideAllAuthScreens() {
-            document.querySelectorAll('.auth-screen').forEach(s => s.classList.remove('active'));
-            document.getElementById('appLayout').style.display = 'flex';
-        }
+        // Render Feed Cards
+        function loadFeed() {
+            const grid = document.getElementById('feedGrid');
+            let allCards = [];
 
-        function generatePassword(id) {
-            return id.split('').map(d => String.fromCharCode(97 + parseInt(d))).join('');
-        }
-
-        function generateUniqueId() {
-            let accounts = JSON.parse(localStorage.getItem('vibe_accounts') || '[]');
-            let usedIds = accounts.map(a => a.id);
-            if (currentUser && currentUser.id) usedIds.push(currentUser.id);
-
-            let length = 12;
-            while (true) {
-                let candidate = '';
-                for (let i = 0; i < length; i++) {
-                    candidate += Math.floor(Math.random() * 10);
-                }
-                if (!usedIds.includes(candidate)) return candidate;
-            }
-        }
-
-        function createAccount() {
-            const name = document.getElementById('createNameInput').value.trim();
-            if (!name) return alert('Please enter your name');
-
-            const id = generateUniqueId();
-            const password = generatePassword(id);
-
-            let accounts = JSON.parse(localStorage.getItem('vibe_accounts') || '[]');
-            accounts.push({ name, id, password });
-            localStorage.setItem('vibe_accounts', JSON.stringify(accounts));
-
-            currentUser = { name, id, password };
-            localStorage.setItem('vibe_user', JSON.stringify(currentUser));
-
-            document.getElementById('generatedIdDisplay').innerText = id;
-            document.getElementById('generatedPasswordDisplay').innerText = password;
-            document.getElementById('createAccountForm').style.display = 'none';
-            document.getElementById('accountCreatedInfo').style.display = 'block';
-        }
-
-        function continueToApp() { initPeer(); }
-
-        function login() {
-            const name = document.getElementById('loginNameInput').value.trim();
-            const id = document.getElementById('loginIdInput').value.trim();
-            const password = document.getElementById('loginPasswordInput').value.trim();
-
-            if (!name || !id || !password) return alert('Fill all fields');
-
-            const accounts = JSON.parse(localStorage.getItem('vibe_accounts') || '[]');
-            const account = accounts.find(a => a.id === id && a.password === password);
-            if (!account) return alert('Invalid ID or password');
-
-            currentUser = { name, id, password };
-            localStorage.setItem('vibe_user', JSON.stringify(currentUser));
-            initPeer();
-        }
-
-        function showSettings() {
-            document.getElementById('currentPasswordDisplay').innerText = currentUser.password;
-            document.getElementById('settingsModal').style.display = 'flex';
-        }
-        function closeSettings() { document.getElementById('settingsModal').style.display = 'none'; }
-
-        function initPeer() {
-            if (peer) peer.destroy();
-            peer = new Peer('vibe-' + currentUser.id);
-
-            peer.on('open', () => {
-                hideAllAuthScreens();
-                document.getElementById('myProfileName').innerText = currentUser.name;
-                document.getElementById('myProfileId').innerText = 'ID: ' + currentUser.id;
-                renderContacts();
-            });
-
-            peer.on('connection', (conn) => {
-                const incomingId = conn.peer.replace('vibe-', '');
-                connections[incomingId] = conn;
-
-                conn.on('data', (data) => {
-                    if (data.type === 'chat') {
-                        saveMessage(data.fromId, data.fromName, data.text, 'them', data.msgType, data.mediaUrl);
-                        if (!contacts.some(c => c.id === data.fromId)) {
-                            contacts.push({ name: data.fromName, id: data.fromId });
-                            localStorage.setItem('vibe_contacts', JSON.stringify(contacts));
-                            renderContacts();
-                        }
-                        if (activeFriendId === data.fromId) renderMessages();
-                    }
+            staticItems.forEach(item => {
+                allCards.push({
+                    category: item.type,
+                    html: `
+                        <div class="card item-${item.type}" onclick="playDirectItem('${item.path}')">
+                            <div class="thumbnail">
+                                <i class="fa-solid ${item.bg} play-icon"></i>
+                                <span class="badge">${item.type.toUpperCase()}</span>
+                            </div>
+                            <div class="card-details">
+                                <div class="avatar"><i class="fa-solid ${item.icon}"></i></div>
+                                <div class="info">
+                                    <h3>${item.title}</h3>
+                                    <p>JoyMix • Play Now</p>
+                                </div>
+                            </div>
+                        </div>`
                 });
             });
+
+            allCards.sort(() => 0.5 - Math.random());
+            grid.innerHTML = allCards.map(c => c.html).join('');
         }
 
-        function openModal() { document.getElementById('addContactModal').style.display = 'flex'; }
-        function closeModal() { document.getElementById('addContactModal').style.display = 'none'; }
+        // Filter Categories
+        function filterCategory(category, el) {
+            document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
 
-        function saveContact() {
-            const friendName = document.getElementById('friendNameInput').value.trim();
-            const friendId = document.getElementById('friendIdInput').value.trim();
-
-            if (!friendName || !/^[0-9]{12,25}$/.test(friendId)) return alert('Enter valid info');
-            if (friendId === currentUser.id) return alert('Cannot add yourself!');
-
-            if (!contacts.some(c => c.id === friendId)) {
-                contacts.push({ name: friendName, id: friendId });
-                localStorage.setItem('vibe_contacts', JSON.stringify(contacts));
-                renderContacts();
-            }
-            closeModal();
-            selectContact(friendId);
-        }
-
-        function renderContacts() {
-            const container = document.getElementById('contactsContainer');
-            container.innerHTML = '';
-
-            contacts.forEach(c => {
-                const userMsgs = messagesDB[c.id] || [];
-                let lastMsg = 'Click to chat';
-                if (userMsgs.length > 0) {
-                    const last = userMsgs[userMsgs.length - 1];
-                    if (last.msgType === 'image') lastMsg = '📷 Photo';
-                    else if (last.msgType === 'video') lastMsg = '🎥 Video';
-                    else if (last.msgType === 'audio') lastMsg = '🎙️ Voice Note';
-                    else lastMsg = last.text;
-                }
-
-                const item = document.createElement('div');
-                item.className = `contact-item ${activeFriendId === c.id ? 'active' : ''}`;
-                item.onclick = () => selectContact(c.id);
-                item.innerHTML = `
-                    <div class="avatar">${c.name.charAt(0).toUpperCase()}</div>
-                    <div class="contact-details">
-                        <div class="contact-title"><span>${c.name}</span></div>
-                        <div class="last-msg">${lastMsg}</div>
-                    </div>
-                `;
-                container.appendChild(item);
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => {
+                card.style.display = (category === 'all' || card.classList.contains('item-' + category)) ? 'flex' : 'none';
             });
         }
 
-        function selectContact(friendId) {
-            activeFriendId = friendId;
-            const contact = contacts.find(c => c.id === friendId);
-
-            document.getElementById('emptyChatView').style.display = 'none';
-            document.getElementById('activeChatView').style.display = 'flex';
-            document.getElementById('activeAvatar').innerText = contact ? contact.name.charAt(0).toUpperCase() : '?';
-            document.getElementById('activeContactName').innerText = contact ? contact.name : friendId;
-            document.getElementById('activeContactId').innerText = 'ID: ' + friendId;
-            document.getElementById('appLayout').classList.add('full-chat');
-
-            if (!connections[friendId]) {
-                const conn = peer.connect('vibe-' + friendId, { reliable: true });
-                connections[friendId] = conn;
-                conn.on('data', (data) => {
-                    if (data.type === 'chat') {
-                        saveMessage(data.fromId, data.fromName, data.text, 'them', data.msgType, data.mediaUrl);
-                        if (activeFriendId === data.fromId) renderMessages();
-                    }
-                });
-            }
-
-            renderContacts();
-            renderMessages();
+        // Play Item Directly
+        function playDirectItem(path) {
+            document.getElementById('mainFrame').src = path;
+            document.getElementById('playerModal').style.display = 'flex';
         }
 
-        function goBackToContacts() { document.getElementById('appLayout').classList.remove('full-chat'); }
-
-        function sendMessage(msgType = 'text', mediaUrl = null) {
-            const input = document.getElementById('messageInput');
-            const text = msgType === 'text' ? input.value.trim() : '';
-            if ((!text && !mediaUrl) || !activeFriendId) return;
-
-            const payload = {
-                type: 'chat',
-                fromName: currentUser.name,
-                fromId: currentUser.id,
-                text: text,
-                msgType: msgType,
-                mediaUrl: mediaUrl
-            };
-
-            const conn = connections[activeFriendId];
-            if (conn && conn.open) conn.send(payload);
-
-            saveMessage(activeFriendId, currentUser.name, text, 'me', msgType, mediaUrl);
-            if (msgType === 'text') input.value = '';
-            renderMessages();
-            renderContacts();
+        function closePlayer() {
+            document.getElementById('mainFrame').src = '';
+            document.getElementById('playerModal').style.display = 'none';
         }
-
-        function handleFileSelect(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                sendMessage(file.type.startsWith('video') ? 'video' : 'image', event.target.result);
-            };
-            reader.readAsDataURL(file);
-            e.target.value = '';
-        }
-
-        async function toggleVoiceRecording() {
-            if (!activeFriendId) return alert('Select a contact first');
-
-            if (!isRecording) {
-                try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    mediaRecorder = new MediaRecorder(stream);
-                    audioChunks = [];
-
-                    mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) audioChunks.push(e.data); };
-                    mediaRecorder.onstop = () => {
-                        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                        const reader = new FileReader();
-                        reader.onloadend = () => sendMessage('audio', reader.result);
-                        reader.readAsDataURL(audioBlob);
-                        stream.getTracks().forEach(track => track.stop());
-                    };
-
-                    mediaRecorder.start();
-                    isRecording = true;
-
-                    document.getElementById('micBtn').classList.add('recording');
-                    document.getElementById('messageInput').style.display = 'none';
-                    document.getElementById('recordingStatus').style.display = 'flex';
-
-                    recSeconds = 0;
-                    recTimer = setInterval(() => {
-                        recSeconds++;
-                        document.getElementById('recordingTime').innerText = `Recording ${recSeconds}s...`;
-                    }, 1000);
-
-                } catch (err) {
-                    alert('Microphone access denied. Please grant permissions in your Android settings.');
-                }
-            } else {
-                mediaRecorder.stop();
-                isRecording = false;
-                clearInterval(recTimer);
-                document.getElementById('micBtn').classList.remove('recording');
-                document.getElementById('messageInput').style.display = 'block';
-                document.getElementById('recordingStatus').style.display = 'none';
-            }
-        }
-
-        function saveMessage(friendId, senderName, text, type, msgType = 'text', mediaUrl = null) {
-            if (!messagesDB[friendId]) messagesDB[friendId] = [];
-            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            messagesDB[friendId].push({ text, type, time, msgType, mediaUrl });
-            localStorage.setItem('vibe_messages', JSON.stringify(messagesDB));
-        }
-
-        function renderMessages() {
-            const container = document.getElementById('chatMessages');
-            container.innerHTML = '';
-            const list = messagesDB[activeFriendId] || [];
-            list.forEach(msg => {
-                const div = document.createElement('div');
-                div.className = `msg-bubble ${msg.type}`;
-                let contentHTML = '';
-                if (msg.msgType === 'image') contentHTML += `<img src="${msg.mediaUrl}">`;
-                else if (msg.msgType === 'video') contentHTML += `<video src="${msg.mediaUrl}" controls></video>`;
-                else if (msg.msgType === 'audio') contentHTML += `<audio src="${msg.mediaUrl}" controls></audio>`;
-                if (msg.text) contentHTML += `<div>${msg.text}</div>`;
-                contentHTML += `<div class="msg-time">${msg.time}</div>`;
-                div.innerHTML = contentHTML;
-                container.appendChild(div);
-            });
-            container.scrollTop = container.scrollHeight;
-        }
-
-        function deleteChat() {
-            if (activeFriendId && confirm("Clear chat?")) {
-                delete messagesDB[activeFriendId];
-                localStorage.setItem('vibe_messages', JSON.stringify(messagesDB));
-                renderMessages(); renderContacts();
-            }
-        }
-
-        function deleteContact() {
-            if (activeFriendId && confirm("Delete contact?")) {
-                contacts = contacts.filter(c => c.id !== activeFriendId);
-                localStorage.setItem('vibe_contacts', JSON.stringify(contacts));
-                delete messagesDB[activeFriendId];
-                localStorage.setItem('vibe_messages', JSON.stringify(messagesDB));
-                activeFriendId = null;
-                document.getElementById('activeChatView').style.display = 'none';
-                document.getElementById('emptyChatView').style.display = 'flex';
-                goBackToContacts(); renderContacts();
-            }
-        }
-
-        function handleKeyPress(e) { if (e.key === 'Enter') sendMessage(); }
     </script>
 </body>
 </html>
