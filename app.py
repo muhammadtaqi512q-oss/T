@@ -2,42 +2,34 @@ from flask import Flask, render_template_string
 
 app = Flask(__name__)
 
-# Main shell HTML – only fetches and injects the UI
+# Main HTML (View Source / CTRL + U par sirf yeh dikhega)
 MAIN_HTML = """<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>JoyMix - Created by Muhammad Taqi</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <style>
-        body { background-color: #0f0f0f; margin: 0; }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexura</title>
 </head>
-<body>
-    <div id="joymix-app"></div>
+<body style="background-color: #090014; margin: 0;">
+
+    <div id="nexura-app"></div>
+
     <script>
+        // Leading slash (/) add kiya taake API hamesha root URL se hi call ho
         fetch('/api/render-ui')
             .then(response => response.text())
-            .then(html => {
-                const appDiv = document.getElementById('joymix-app');
-                appDiv.innerHTML = html;
-                // Execute all script tags that were part of the injected UI
-                const scripts = appDiv.querySelectorAll('script');
-                scripts.forEach(script => {
-                    const newScript = document.createElement('script');
-                    newScript.textContent = script.textContent;
-                    document.body.appendChild(newScript);
-                    script.remove();
-                });
+            .then(htmlContent => {
+                document.getElementById('nexura-app').innerHTML = htmlContent;
             })
             .catch(err => console.error('Error loading UI:', err));
     </script>
+
 </body>
 </html>"""
 
-# Full JoyMix UI (styles + markup + logic) returned by the API
-BACKEND_UI_COMPONENT = r"""
+# Backend JoyMix App UI Component
+BACKEND_UI_COMPONENT = """
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 <style>
     * {
         margin: 0;
@@ -441,7 +433,7 @@ BACKEND_UI_COMPONENT = r"""
 
 <div id="selector-screen">
     <h1 class="brand-title">Joy<span>Mix</span></h1>
-    <div class="creator-tag"><i class="fa-solid fa-code"></i> Created by Muhammad Taqi</div>        
+    <div class="creator-tag"><i class="fa-solid fa-code"></i> Created by Muhammad Taqi</div>
     <div class="btn-container">
         <button class="mode-btn online-btn" onclick="launchOnline()">
             <i class="fa-solid fa-globe"></i> Online
@@ -515,19 +507,20 @@ BACKEND_UI_COMPONENT = r"""
         document.getElementById('selector-screen').style.display = 'flex';
     }
 
+    // Static files path - Ensure these files are placed inside the /static/ directory
     const staticItems = [
-        { type: 'games', title: '50 Game Classic', path: '50.html', icon: 'fa-trophy', bg: 'fa-gamepad' },
-        { type: 'games', title: 'Flappy Bird Arcade', path: 'Flappy-Bird.html', icon: 'fa-dove', bg: 'fa-crow' },
-        { type: 'games', title: 'Hill Climb Racing', path: 'Hill-Climb.html', icon: 'fa-truck', bg: 'fa-car' },
-        { type: 'games', title: 'Dino Runner v1', path: 'diano1.html', icon: 'fa-paw', bg: 'fa-dragon' },
-        { type: 'games', title: 'Dino Runner v2', path: 'diano2.html', icon: 'fa-dragon', bg: 'fa-dragon' },
-        { type: 'games', title: 'Ludo Star Online', path: 'ludo.html', icon: 'fa-dice-four', bg: 'fa-dice' },
-        { type: 'games', title: 'Stickman Hero', path: 'stickman.html', icon: 'fa-user-ninja', bg: 'fa-person-running' },
-        { type: 'games', title: 'Rock Paper Scissors', path: 'stone-paper-seasor.html', icon: 'fa-hand-back-fist', bg: 'fa-hand' },
-        { type: 'games', title: 'Tic Tac Toe Pro v2', path: 'tic-cros-2.html', icon: 'fa-xmark', bg: 'fa-hashtag' },
-        { type: 'games', title: 'Tic Tac Toe Classic', path: 'tic-cross.html', icon: 'fa-grip-lines', bg: 'fa-table-cells' },
-        { type: 'poetry', title: 'Poetry Cards & Quotes', path: 'poetry.html', icon: 'fa-book-open', bg: 'fa-feather' },
-        { type: 'images', title: 'Offline Image Storage', path: 'offline.html', icon: 'fa-box-archive', bg: 'fa-hard-drive' }
+        { type: 'games', title: '50 Game Classic', path: '/static/50.html', icon: 'fa-trophy', bg: 'fa-gamepad' },
+        { type: 'games', title: 'Flappy Bird Arcade', path: '/static/Flappy-Bird.html', icon: 'fa-dove', bg: 'fa-crow' },
+        { type: 'games', title: 'Hill Climb Racing', path: '/static/Hill-Climb.html', icon: 'fa-truck', bg: 'fa-car' },
+        { type: 'games', title: 'Dino Runner v1', path: '/static/diano1.html', icon: 'fa-paw', bg: 'fa-dragon' },
+        { type: 'games', title: 'Dino Runner v2', path: '/static/diano2.html', icon: 'fa-dragon', bg: 'fa-dragon' },
+        { type: 'games', title: 'Ludo Star Online', path: '/static/ludo.html', icon: 'fa-dice-four', bg: 'fa-dice' },
+        { type: 'games', title: 'Stickman Hero', path: '/static/stickman.html', icon: 'fa-user-ninja', bg: 'fa-person-running' },
+        { type: 'games', title: 'Rock Paper Scissors', path: '/static/stone-paper-seasor.html', icon: 'fa-hand-back-fist', bg: 'fa-hand' },
+        { type: 'games', title: 'Tic Tac Toe Pro v2', path: '/static/tic-cros-2.html', icon: 'fa-xmark', bg: 'fa-hashtag' },
+        { type: 'games', title: 'Tic Tac Toe Classic', path: '/static/tic-cross.html', icon: 'fa-grip-lines', bg: 'fa-table-cells' },
+        { type: 'poetry', title: 'Poetry Cards & Quotes', path: '/static/poetry.html', icon: 'fa-book-open', bg: 'fa-feather' },
+        { type: 'images', title: 'Offline Image Storage', path: '/static/offline.html', icon: 'fa-box-archive', bg: 'fa-hard-drive' }
     ];
 
     function toggleTheme() {
@@ -540,6 +533,7 @@ BACKEND_UI_COMPONENT = r"""
     function loadFeed() {
         const grid = document.getElementById('feedGrid');
         let allCards = [];
+
         staticItems.forEach(item => {
             allCards.push({
                 category: item.type,
@@ -573,15 +567,13 @@ BACKEND_UI_COMPONENT = r"""
         });
     }
 
-    // Full Page View Logic for Mobile
     function playDirectItem(path) {
         const playerModal = document.getElementById('playerModal');
         const mainFrame = document.getElementById('mainFrame');
-                
+        
         mainFrame.src = path;
         playerModal.style.display = 'flex';
-                
-        // Mobile Browser Par Fullscreen API trigger karna (optional)
+        
         if (playerModal.requestFullscreen) {
             playerModal.requestFullscreen().catch(err => console.log(err));
         } else if (playerModal.webkitRequestFullscreen) {
@@ -592,11 +584,10 @@ BACKEND_UI_COMPONENT = r"""
     function closePlayer() {
         const playerModal = document.getElementById('playerModal');
         const mainFrame = document.getElementById('mainFrame');
-                
+        
         mainFrame.src = '';
         playerModal.style.display = 'none';
 
-        // Exit full screen mode if active
         if (document.fullscreenElement || document.webkitFullscreenElement) {
             if (document.exitFullscreen) {
                 document.exitFullscreen();
