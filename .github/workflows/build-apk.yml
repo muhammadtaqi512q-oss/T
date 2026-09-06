@@ -1,21 +1,17 @@
-name: Build Android APK with Mic Support
+name: Build Clean APK with Icon
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
 
       - name: Setup Java JDK
         uses: actions/setup-java@v4
@@ -23,46 +19,35 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Install Cordova, Plugins & Configure Permissions
+      - name: Install Cordova & Build APK with Icon
         run: |
           npm install -g cordova
           
-          # 1. Create Cordova App
-          cordova create vibeApp com.taqi.vibe Vibe
+          # 1. Create Cordova project
+          cordova create app com.joymix.nexura "JOYMIX"
           
-          # 2. Copy Web Source Code
-          cp index.html vibeApp/www/
+          # 2. Copy ALL HTML and web files to www folder
+          cp -r *.html *.png *.jpg *.jpeg *.css *.js app/www/ 2>/dev/null || true
+          # cp -r css js images app/www/ 2>/dev/null || true
           
-          # 3. Enter Project Directory
-          cd vibeApp
-
-          # 4. Copy Icon & Inject into config.xml
-          if [ -f "../icon.png" ]; then
-            cp ../icon.png www/icon.png
-            sed -i '/<\/widget>/i \    <icon src="www/icon.png" />' config.xml
+          # 3. Add Custom Icon to Config if icon.png exists
+          if [ -f "icon.png" ]; then
+            cp icon.png app/www/icon.png
+            sed -i '/<\/widget>/i \    <icon src="www/icon.png" />' app/config.xml
           fi
           
-          # 5. Add Android Platform
+          # 4. Add Android Platform & Build
+          cd app
           cordova platform add android
-          
-          # 6. Install Plugins for Microphone Access
-          cordova plugin add cordova-plugin-android-permissions
-          cordova plugin add cordova-plugin-media-capture
-          
-          # 7. Inject Manifest Permissions
-          sed -i '/<\/manifest>/i \    <uses-permission android:name="android.permission.INTERNET" />\n    <uses-permission android:name="android.permission.RECORD_AUDIO" />\n    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />\n    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />\n    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />' platforms/android/app/src/main/AndroidManifest.xml
-          
-          # 8. Build Debug APK
           cordova build android --debug
 
-      - name: Upload APK Artifact
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: vibe-debug-apk
-          path: vibeApp/platforms/android/app/build/outputs/apk/debug/app-debug.apk
+          name: VIBE-APP-APK
+          path: app/platforms/android/app/build/outputs/apk/debug/app-debug.apk
