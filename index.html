@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>JoyMix - Created by Muhammad Taqi</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -11,6 +11,7 @@
             padding: 0;
             box-sizing: border-box;
             font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
@@ -60,14 +61,16 @@
             gap: 20px;
             flex-wrap: wrap;
             justify-content: center;
+            width: 100%;
+            max-width: 400px;
         }
 
         .mode-btn {
             background: #181818;
             color: #fff;
             border: 1px solid rgba(255, 255, 255, 0.15);
-            padding: 20px 40px;
-            font-size: 1.2rem;
+            padding: 16px 30px;
+            font-size: 1.1rem;
             font-weight: 600;
             border-radius: 14px;
             cursor: pointer;
@@ -75,15 +78,13 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            min-width: 180px;
+            width: 100%;
             justify-content: center;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
         }
 
-        .mode-btn:hover {
-            transform: translateY(-50px);
-            border-color: #ff0000;
-            box-shadow: 0 8px 25px rgba(255, 0, 0, 0.3);
+        .mode-btn:active {
+            transform: scale(0.98);
         }
 
         .mode-btn.online-btn:hover {
@@ -99,7 +100,7 @@
             display: none;
             width: 100vw;
             height: 100vh;
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
             z-index: 10;
@@ -111,27 +112,21 @@
             border: none;
         }
 
-        /* Back to Menu Button for Online Frame */
+        /* Back to Menu Button */
         .back-to-menu {
             position: fixed;
             bottom: 20px;
             right: 20px;
-            background: rgba(255, 0, 0, 0.85);
+            background: rgba(255, 0, 0, 0.9);
             color: #fff;
             border: none;
-            padding: 10px 18px;
+            padding: 12px 20px;
             border-radius: 30px;
             font-weight: bold;
             cursor: pointer;
             z-index: 9999;
             box-shadow: 0 4px 12px rgba(0,0,0,0.5);
             backdrop-filter: blur(5px);
-            transition: transform 0.2s;
-        }
-
-        .back-to-menu:hover {
-            transform: scale(1.05);
-            background: #ff0000;
         }
 
         /* Offline Template Custom Internal Styles */
@@ -172,7 +167,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 20px;
+            padding: 0 15px;
             position: sticky;
             top: 0;
             z-index: 100;
@@ -183,65 +178,57 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            font-size: 22px;
+            font-size: 20px;
             font-weight: 700;
             color: var(--text-color);
-            letter-spacing: -0.5px;
-            cursor: pointer;
             text-decoration: none;
         }
 
         .logo-icon {
             color: #ff0000;
-            font-size: 26px;
+            font-size: 24px;
         }
 
         .header-actions {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
         }
 
         .theme-toggle-btn {
             background: var(--chip-bg);
             color: var(--text-color);
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             border: 1px solid var(--border-color);
-            font-size: 18px;
+            font-size: 16px;
         }
 
         .creator-link {
             background: var(--chip-bg);
             color: var(--text-color);
-            padding: 8px 16px;
+            padding: 6px 12px;
             border-radius: 20px;
             text-decoration: none;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             border: 1px solid var(--border-color);
-        }
-
-        .creator-link:hover {
-            background: #ff0000;
-            color: #fff;
-            border-color: #ff0000;
         }
 
         .category-bar {
             width: 100%;
-            padding: 12px 20px;
+            padding: 10px 15px;
             background: var(--bg-color);
             display: flex;
-            gap: 12px;
+            gap: 10px;
             overflow-x: auto;
             position: sticky;
             top: 60px;
@@ -256,25 +243,25 @@
         .chip {
             background: var(--chip-bg);
             color: var(--text-color);
-            padding: 8px 18px;
-            border-radius: 12px;
-            font-size: 14px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
             font-weight: 500;
             white-space: nowrap;
             cursor: pointer;
             border: none;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
         }
 
-        .chip.active, .chip:hover {
-            background: var(--chip-hover-bg);
-            color: var(--chip-hover-text);
+        .chip.active {
+            background: #ff0000;
+            color: #ffffff;
         }
 
         main {
-            padding: 20px;
+            padding: 15px;
             max-width: 1600px;
             margin: 0 auto;
             width: 100%;
@@ -282,87 +269,91 @@
 
         .grid-feed {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(100%, 1fr));
+            gap: 15px;
+        }
+
+        @media (min-width: 600px) {
+            .grid-feed {
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            }
         }
 
         .card {
             background: var(--card-bg);
-            border-radius: 16px;
+            border-radius: 12px;
             overflow: hidden;
             cursor: pointer;
             display: flex;
             flex-direction: column;
             border: 1px solid var(--border-color);
-            transition: transform 0.2s, box-shadow 0.2s;
         }
 
-        .card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 20px var(--shadow-color);
+        .card:active {
+            transform: scale(0.98);
         }
 
         .thumbnail {
             width: 100%;
-            height: 180px;
+            height: 160px;
             position: relative;
             display: flex;
             justify-content: center;
             align-items: center;
-            background-color: rgba(128, 128, 128, 0.2);
+            background-color: rgba(128, 128, 128, 0.1);
         }
 
         .thumbnail i.play-icon {
-            font-size: 48px;
+            font-size: 42px;
             color: #ff0000;
-            filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5));
         }
 
         .badge {
             position: absolute;
-            bottom: 10px;
-            right: 10px;
+            bottom: 8px;
+            right: 8px;
             background: rgba(0, 0, 0, 0.85);
             color: #fff;
-            padding: 3px 8px;
-            border-radius: 6px;
-            font-size: 11px;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 10px;
             font-weight: 600;
             text-transform: uppercase;
         }
 
         .card-details {
-            padding: 14px;
+            padding: 12px;
             display: flex;
-            gap: 12px;
+            gap: 10px;
         }
 
         .avatar {
-            width: 36px;
-            height: 36px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             background: var(--chip-bg);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 14px;
+            font-size: 13px;
             color: var(--text-color);
             flex-shrink: 0;
         }
 
         .info h3 {
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 600;
             color: var(--text-color);
             line-height: 1.3;
-            margin-bottom: 4px;
+            margin-bottom: 2px;
         }
 
         .info p {
-            font-size: 13px;
+            font-size: 12px;
             color: var(--subtext-color);
         }
 
+        /* Mobile Full-Screen Player Modal */
         .player-modal {
             display: none;
             position: fixed;
@@ -371,45 +362,47 @@
             width: 100vw;
             height: 100vh;
             background: #000;
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
+            z-index: 10000;
+            flex-direction: column;
         }
 
         .player-container {
-            width: 100vw;
-            height: 100vh;
+            width: 100%;
+            height: 100%;
             position: relative;
-            overflow: hidden;
+        }
+
+        #mainFrame {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
         }
 
         .controls-overlay {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            display: flex;
-            gap: 12px;
-            z-index: 1001;
+            position: fixed;
+            top: 12px;
+            right: 12px;
+            z-index: 10001;
         }
 
         .action-btn {
             color: #fff;
-            font-size: 16px;
+            font-size: 18px;
             cursor: pointer;
-            background: rgba(0, 0, 0, 0.7);
-            width: 42px;
-            height: 42px;
+            background: rgba(255, 0, 0, 0.85);
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(255, 255, 255, 0.25);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
         .action-btn:active {
             transform: scale(0.9);
-            background: #ff0000;
         }
     </style>
 </head>
@@ -444,7 +437,7 @@
                     <i class="fa-solid fa-moon" id="themeIcon"></i>
                 </div>
                 <a href="#" onclick="resetToMenu()" class="creator-link">
-                    <i class="fa-solid fa-circle-user"></i> Created by Muhammad Taqi
+                    <i class="fa-solid fa-circle-user"></i> Muhammad Taqi
                 </a>
             </div>
         </header>
@@ -461,19 +454,18 @@
         </main>
 
         <div class="player-modal" id="playerModal">
-            <div class="player-container">
-                <div class="controls-overlay">
-                    <span class="action-btn" onclick="closePlayer()" title="Close">
-                        <i class="fa-solid fa-xmark"></i>
-                    </span>
+            <div class="controls-overlay">
+                <div class="action-btn" onclick="closePlayer()" title="Close Fullscreen">
+                    <i class="fa-solid fa-xmark"></i>
                 </div>
-                <iframe id="mainFrame" src="" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+            </div>
+            <div class="player-container">
+                <iframe id="mainFrame" src="" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>
             </div>
         </div>
     </div>
 
     <script>
-        // Navigation Logic
         function launchOnline() {
             document.getElementById('selector-screen').style.display = 'none';
             document.getElementById('online-frame-container').style.display = 'block';
@@ -493,7 +485,6 @@
             document.getElementById('selector-screen').style.display = 'flex';
         }
 
-        // Static Local Assets & Games Data
         const staticItems = [
             { type: 'games', title: '50 Game Classic', path: '50.html', icon: 'fa-trophy', bg: 'fa-gamepad' },
             { type: 'games', title: 'Flappy Bird Arcade', path: 'Flappy-Bird.html', icon: 'fa-dove', bg: 'fa-crow' },
@@ -509,7 +500,6 @@
             { type: 'images', title: 'Offline Image Storage', path: 'offline.html', icon: 'fa-box-archive', bg: 'fa-hard-drive' }
         ];
 
-        // Theme Switcher
         function toggleTheme() {
             const body = document.body;
             const icon = document.getElementById('themeIcon');
@@ -517,7 +507,6 @@
             icon.className = body.classList.contains('light-theme') ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
         }
 
-        // Render Feed Cards
         function loadFeed() {
             const grid = document.getElementById('feedGrid');
             let allCards = [];
@@ -535,18 +524,16 @@
                                 <div class="avatar"><i class="fa-solid ${item.icon}"></i></div>
                                 <div class="info">
                                     <h3>${item.title}</h3>
-                                    <p>JoyMix • Play Now</p>
+                                    <p>JoyMix • Open Full Screen</p>
                                 </div>
                             </div>
                         </div>`
                 });
             });
 
-            allCards.sort(() => 0.5 - Math.random());
             grid.innerHTML = allCards.map(c => c.html).join('');
         }
 
-        // Filter Categories
         function filterCategory(category, el) {
             document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
             el.classList.add('active');
@@ -557,15 +544,37 @@
             });
         }
 
-        // Play Item Directly
+        // Full Page View Logic for Mobile
         function playDirectItem(path) {
-            document.getElementById('mainFrame').src = path;
-            document.getElementById('playerModal').style.display = 'flex';
+            const playerModal = document.getElementById('playerModal');
+            const mainFrame = document.getElementById('mainFrame');
+            
+            mainFrame.src = path;
+            playerModal.style.display = 'flex';
+            
+            // Mobile Browser Par Fullscreen API trigger karna (optional)
+            if (playerModal.requestFullscreen) {
+                playerModal.requestFullscreen().catch(err => console.log(err));
+            } else if (playerModal.webkitRequestFullscreen) {
+                playerModal.webkitRequestFullscreen();
+            }
         }
 
         function closePlayer() {
-            document.getElementById('mainFrame').src = '';
-            document.getElementById('playerModal').style.display = 'none';
+            const playerModal = document.getElementById('playerModal');
+            const mainFrame = document.getElementById('mainFrame');
+            
+            mainFrame.src = '';
+            playerModal.style.display = 'none';
+
+            // Exit full screen mode if active
+            if (document.fullscreenElement || document.webkitFullscreenElement) {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                }
+            }
         }
     </script>
 </body>
