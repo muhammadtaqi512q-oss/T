@@ -15,8 +15,8 @@ MAIN_HTML = """<!DOCTYPE html>
     <div id="nexura-app"></div>
 
     <script>
-        // Backend API se UI components aur design fetch ho kar yahan inject hongay
-        fetch('api/render-ui')
+        // Leading slash (/) add kiya taake API hamesha root URL se hi call ho
+        fetch('/api/render-ui')
             .then(response => response.text())
             .then(htmlContent => {
                 document.getElementById('nexura-app').innerHTML = htmlContent;
@@ -507,19 +507,20 @@ BACKEND_UI_COMPONENT = """
         document.getElementById('selector-screen').style.display = 'flex';
     }
 
+    // Static files path - Ensure these files are placed inside the /static/ directory
     const staticItems = [
-        { type: 'games', title: '50 Game Classic', path: '50.html', icon: 'fa-trophy', bg: 'fa-gamepad' },
-        { type: 'games', title: 'Flappy Bird Arcade', path: 'Flappy-Bird.html', icon: 'fa-dove', bg: 'fa-crow' },
-        { type: 'games', title: 'Hill Climb Racing', path: 'Hill-Climb.html', icon: 'fa-truck', bg: 'fa-car' },
-        { type: 'games', title: 'Dino Runner v1', path: 'diano1.html', icon: 'fa-paw', bg: 'fa-dragon' },
-        { type: 'games', title: 'Dino Runner v2', path: 'diano2.html', icon: 'fa-dragon', bg: 'fa-dragon' },
-        { type: 'games', title: 'Ludo Star Online', path: 'ludo.html', icon: 'fa-dice-four', bg: 'fa-dice' },
-        { type: 'games', title: 'Stickman Hero', path: 'stickman.html', icon: 'fa-user-ninja', bg: 'fa-person-running' },
-        { type: 'games', title: 'Rock Paper Scissors', path: 'stone-paper-seasor.html', icon: 'fa-hand-back-fist', bg: 'fa-hand' },
-        { type: 'games', title: 'Tic Tac Toe Pro v2', path: 'tic-cros-2.html', icon: 'fa-xmark', bg: 'fa-hashtag' },
-        { type: 'games', title: 'Tic Tac Toe Classic', path: 'tic-cross.html', icon: 'fa-grip-lines', bg: 'fa-table-cells' },
-        { type: 'poetry', title: 'Poetry Cards & Quotes', path: 'poetry.html', icon: 'fa-book-open', bg: 'fa-feather' },
-        { type: 'images', title: 'Offline Image Storage', path: 'offline.html', icon: 'fa-box-archive', bg: 'fa-hard-drive' }
+        { type: 'games', title: '50 Game Classic', path: '/static/50.html', icon: 'fa-trophy', bg: 'fa-gamepad' },
+        { type: 'games', title: 'Flappy Bird Arcade', path: '/static/Flappy-Bird.html', icon: 'fa-dove', bg: 'fa-crow' },
+        { type: 'games', title: 'Hill Climb Racing', path: '/static/Hill-Climb.html', icon: 'fa-truck', bg: 'fa-car' },
+        { type: 'games', title: 'Dino Runner v1', path: '/static/diano1.html', icon: 'fa-paw', bg: 'fa-dragon' },
+        { type: 'games', title: 'Dino Runner v2', path: '/static/diano2.html', icon: 'fa-dragon', bg: 'fa-dragon' },
+        { type: 'games', title: 'Ludo Star Online', path: '/static/ludo.html', icon: 'fa-dice-four', bg: 'fa-dice' },
+        { type: 'games', title: 'Stickman Hero', path: '/static/stickman.html', icon: 'fa-user-ninja', bg: 'fa-person-running' },
+        { type: 'games', title: 'Rock Paper Scissors', path: '/static/stone-paper-seasor.html', icon: 'fa-hand-back-fist', bg: 'fa-hand' },
+        { type: 'games', title: 'Tic Tac Toe Pro v2', path: '/static/tic-cros-2.html', icon: 'fa-xmark', bg: 'fa-hashtag' },
+        { type: 'games', title: 'Tic Tac Toe Classic', path: '/static/tic-cross.html', icon: 'fa-grip-lines', bg: 'fa-table-cells' },
+        { type: 'poetry', title: 'Poetry Cards & Quotes', path: '/static/poetry.html', icon: 'fa-book-open', bg: 'fa-feather' },
+        { type: 'images', title: 'Offline Image Storage', path: '/static/offline.html', icon: 'fa-box-archive', bg: 'fa-hard-drive' }
     ];
 
     function toggleTheme() {
