@@ -2,465 +2,984 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Studio | Next Gen</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Realistic Carrom Board</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        /* Very Very Modern Styling */
-        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap');
-
-        :root {
-            --bg-color: #030305;
-            --card-bg: rgba(20, 20, 25, 0.6);
-            --text-main: #ffffff;
-            --text-muted: #8b8b9e;
-            --accent-1: #8A2BE2; /* Purple */
-            --accent-2: #00FFFF; /* Cyan */
-            --accent-3: #FF007F; /* Pink */
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Space Grotesk', sans-serif;
-            cursor: default;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
         body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            overflow-x: hidden;
-            position: relative;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: radial-gradient(circle at center, #1b2838 0%, #0d121d 100%);
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+            overflow: hidden;
         }
 
-        /* Animated Background Orbs */
-        .orb {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(120px);
-            z-index: -1;
-            opacity: 0.6;
-            animation: floatOrb 10s infinite alternate ease-in-out;
-        }
-        .orb-1 { width: 400px; height: 400px; background: var(--accent-1); top: -10%; left: -10%; }
-        .orb-2 { width: 300px; height: 300px; background: var(--accent-2); bottom: -10%; right: -10%; animation-delay: -5s; }
-        .orb-3 { width: 250px; height: 250px; background: var(--accent-3); top: 40%; left: 60%; animation-delay: -2s; opacity: 0.4; }
-
-        @keyframes floatOrb {
-            0% { transform: translate(0, 0) scale(1); }
-            100% { transform: translate(50px, 50px) scale(1.2); }
+        .font-cinzel {
+            font-family: 'Cinzel', serif;
         }
 
-        header {
-            width: 100%;
-            padding: 40px 20px;
-            text-align: center;
-            z-index: 10;
+        /* Glassmorphism styling */
+        .glass-panel {
+            background: rgba(22, 32, 50, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 215, 0, 0.15);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
         }
 
-        header h1 {
-            font-size: 4rem;
-            font-weight: 700;
-            letter-spacing: -2px;
-            background: linear-gradient(to right, #fff, var(--accent-2), var(--accent-1), #fff);
-            background-size: 300% auto;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: shine 5s linear infinite;
-            text-transform: uppercase;
+        /* Responsive board container maintaining square aspect ratio */
+        .board-container {
+            width: min(88vw, 82vh);
+            height: min(88vw, 82vh);
+            max-width: 680px;
+            max-height: 680px;
         }
 
-        @keyframes shine {
-            to { background-position: 300% center; }
-        }
-
-        .container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            max-width: 1000px;
-            padding: 20px;
-            perspective: 1000px; /* For 3D effect */
-        }
-
-        .cards {
-            display: flex;
-            gap: 40px;
-            flex-wrap: wrap;
-            justify-content: center;
-            margin-bottom: 60px;
-        }
-
-        /* 3D Glowing Card Wrapper */
-        .card-wrapper {
-            position: relative;
-            width: 320px;
-            height: 380px;
-            border-radius: 24px;
-            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0));
-            padding: 2px; /* Border width */
-            transition: transform 0.1s ease, box-shadow 0.3s ease;
-            transform-style: preserve-3d;
-            text-decoration: none;
-        }
-
-        /* Animated Border Glow */
-        .card-wrapper::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            border-radius: 24px;
-            background: conic-gradient(from var(--angle), transparent 40%, var(--accent-2), var(--accent-1), transparent 60%);
-            animation: rotateBorder 4s linear infinite;
-            z-index: -1;
-            opacity: 0.5;
-            transition: opacity 0.3s ease;
-        }
-        
-        .card-wrapper:hover::before {
-            opacity: 1;
-        }
-
-        @property --angle {
-            syntax: '<angle>';
-            initial-value: 0deg;
-            inherits: false;
-        }
-
-        @keyframes rotateBorder {
-            to { --angle: 360deg; }
-        }
-
-        /* Inner Glass Card */
-        .card {
-            background: rgba(10, 10, 15, 0.85);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-radius: 22px;
+        canvas {
             width: 100%;
             height: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 40px;
-            text-align: center;
-            transform: translateZ(30px); /* 3D pop out */
-            transition: background 0.3s ease;
+            display: block;
+            border-radius: 12px;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8), 0 10px 30px rgba(0, 0, 0, 0.6);
         }
 
-        .card:hover {
-            background: rgba(15, 15, 25, 0.9);
-        }
-
-        .card-icon {
-            font-size: 5rem;
-            margin-bottom: 20px;
-            filter: drop-shadow(0 0 20px rgba(0, 255, 255, 0.5));
-            transform: translateZ(50px); /* More 3D pop */
-            transition: transform 0.3s ease;
-        }
-
-        .card-wrapper:hover .card-icon {
-            transform: translateZ(70px) scale(1.1);
-        }
-
-        .card h2 {
-            font-size: 1.8rem;
-            margin-bottom: 15px;
-            color: #fff;
-            transform: translateZ(40px);
-        }
-
-        .card p {
-            font-size: 1rem;
-            color: var(--text-muted);
-            line-height: 1.5;
-            transform: translateZ(20px);
-        }
-
-        /* Ultra Modern Games Button */
-        .games-btn {
-            position: relative;
-            background: rgba(255, 255, 255, 0.05);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 18px 50px;
-            font-size: 1.2rem;
-            font-weight: 700;
-            letter-spacing: 1px;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: all 0.4s ease;
-            backdrop-filter: blur(10px);
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            overflow: hidden;
-            z-index: 1;
-        }
-
-        .games-btn::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(90deg, var(--accent-1), var(--accent-3));
-            z-index: -1;
-            transition: opacity 0.4s ease;
-            opacity: 0;
-        }
-
-        .games-btn:hover::before { opacity: 1; }
-        .games-btn:hover {
-            box-shadow: 0 0 30px rgba(255, 0, 127, 0.5);
-            border-color: transparent;
-            transform: translateY(-3px);
-        }
-
-        /* Epic Modal for Games */
-        .modal {
-            display: flex;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.4s ease;
-        }
-
-        .modal.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .modal-content {
-            background: rgba(15, 15, 20, 0.9);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 40px;
-            border-radius: 30px;
-            width: 90%;
-            max-width: 600px;
-            position: relative;
-            transform: translateY(50px) scale(0.95);
-            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-        }
-
-        .modal.active .modal-content {
-            transform: translateY(0) scale(1);
-        }
-
-        .close-btn {
-            position: absolute;
-            top: 20px; right: 25px;
-            font-size: 2rem;
-            cursor: pointer;
-            color: var(--text-muted);
-            transition: 0.3s;
-            line-height: 1;
-        }
-
-        .close-btn:hover { color: var(--accent-3); transform: rotate(90deg); }
-
-        .modal h2 { 
-            margin-bottom: 30px; 
-            color: #fff; 
-            font-size: 2rem;
-            text-align: center;
-            background: linear-gradient(to right, var(--accent-2), var(--accent-1));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        /* Games Grid Layout */
-        .games-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-        }
-
-        .game-link {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            background: rgba(255, 255, 255, 0.03);
-            padding: 20px;
-            border-radius: 15px;
-            text-decoration: none;
-            color: #fff;
-            font-weight: 500;
-            font-size: 1.1rem;
-            transition: all 0.3s ease;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .game-link:hover {
+        /* Custom range slider styling */
+        input[type=range] {
+            -webkit-appearance: none;
             background: rgba(255, 255, 255, 0.1);
-            border-color: var(--accent-2);
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 255, 255, 0.1);
+            border-radius: 8px;
+            height: 8px;
         }
 
-        .game-icon {
-            font-size: 1.5rem;
-        }
-
-        /* --- NEW: Creator Footer Styling --- */
-        .site-footer {
-            width: 100%;
-            text-align: center;
-            padding: 30px 20px;
-            margin-top: auto; /* Pushes footer to the bottom */
-            font-size: 1rem;
-            color: var(--text-muted);
-            letter-spacing: 2px;
-            z-index: 10;
-            position: relative;
-            text-transform: uppercase;
-            font-weight: 500;
-        }
-
-        .creator-name {
-            font-weight: 700;
-            background: linear-gradient(90deg, var(--accent-2), var(--accent-1), var(--accent-3));
-            background-size: 200% auto;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: shine 3s linear infinite;
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 22px;
+            width: 22px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #fef08a, #ca8a04);
             cursor: pointer;
-            transition: all 0.3s ease;
-            display: inline-block;
-            margin-left: 8px;
-            font-size: 1.1rem;
-        }
-
-        .creator-name:hover {
-            filter: drop-shadow(0 0 12px var(--accent-2));
-            transform: translateY(-2px) scale(1.05);
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            header h1 { font-size: 2.5rem; }
-            .cards { flex-direction: column; align-items: center; }
-            .card-wrapper { width: 100%; max-width: 350px; height: 350px; }
-            .games-grid { grid-template-columns: 1fr; }
-            .site-footer { font-size: 0.8rem; }
-            .creator-name { font-size: 0.9rem; }
+            box-shadow: 0 0 10px rgba(234, 179, 8, 0.5);
         }
     </style>
 </head>
-<body>
+<body class="h-screen w-screen flex flex-col justify-between items-center p-2 sm:p-4 text-slate-100 overflow-hidden">
 
-    <!-- Animated Background Orbs -->
-    <div class="orb orb-1"></div>
-    <div class="orb orb-2"></div>
-    <div class="orb orb-3"></div>
-
-    <header>
-        <h1>AI Studio</h1>
-                <h1>created by muhammad taqi</h1>
-
-    </header>
-
-    <div class="container">
-        <div class="cards">
-            <!-- AI Chat Card -->
-            <a href="chat.html" class="card-wrapper tilt">
-                <div class="card">
-                    <div class="card-icon">🧠</div>
-                    <h2>AI Chat</h2>
-                    <p>Experience next-level conversation with our advanced neural AI.</p>
-                </div>
-            </a>
-
-            <!-- Image Generator Card -->
-            <a href="image.html" class="card-wrapper tilt">
-                <div class="card">
-                    <div class="card-icon">✨</div>
-                    <h2>Image AI</h2>
-                    <p>Transform your imagination into breathtaking visuals instantly.</p>
-                </div>
-            </a>
-        </div>
-
-        <!-- Offline Games Button -->
-        <button class="games-btn" id="openGames">
-            <span>🎮</span> OFFLINE GAMES
-        </button>
-    </div>
-
-    <!-- Offline Games Modal -->
-    <div class="modal" id="gamesModal">
-        <div class="modal-content">
-            <span class="close-btn" id="closeGames">&times;</span>
-            <h2>Select a Game</h2>
-            <div class="games-grid">
-                <a href="Flappy-Bird.html" class="game-link"><span class="game-icon">🐦</span> Flappy Bird</a>
-                <a href="tic-cross.html" class="game-link"><span class="game-icon">❌</span> Tic Tac Toe</a>
-                <a href="tic-cros-2.html" class="game-link"><span class="game-icon">⭕</span> Tic Tac Toe V2</a>
-                <a href="diano2.html" class="game-link"><span class="game-icon">🦖</span> Diano Runner</a>
+    <!-- Header Section -->
+    <header class="w-full max-w-4xl flex justify-between items-center px-4 py-2 glass-panel rounded-2xl z-10 my-1">
+        <div class="flex items-center space-x-3">
+            <div class="p-2 bg-amber-500/10 rounded-xl border border-amber-500/20 text-amber-400">
+                <i data-lucide="trophy" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <h1 class="font-cinzel text-lg sm:text-2xl font-bold tracking-wider text-amber-300">REAL CARROM</h1>
+                <p class="text-xs text-slate-400 hidden sm:block">CREATED BY MUHAMMAD TAQI</p>
             </div>
         </div>
-    </div>
 
-    <!-- NEW: Created By Footer -->
-    <footer class="site-footer">
-        Created by <span class="creator-name">Muhammad Taqi</span>
+        <div class="flex items-center space-x-2 sm:space-x-4">
+            <button id="audioToggle" class="p-2 sm:px-3 sm:py-2 bg-slate-800/80 hover:bg-slate-700 rounded-xl border border-slate-700 text-slate-300 flex items-center space-x-1 text-xs transition">
+                <i data-lucide="volume-2" id="soundIcon" class="w-4 h-4"></i>
+                <span class="hidden sm:inline">Sound</span>
+            </button>
+
+            <button id="restartBtn" class="p-2 sm:px-3 sm:py-2 bg-amber-600/80 hover:bg-amber-500 rounded-xl text-white font-medium flex items-center space-x-1 text-xs transition shadow-lg shadow-amber-900/30">
+                <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                <span class="hidden sm:inline">Reset Game</span>
+            </button>
+            
+            <button id="modeBtn" class="p-2 sm:px-3 sm:py-2 bg-indigo-600/80 hover:bg-indigo-500 rounded-xl text-white font-medium flex items-center space-x-1 text-xs transition shadow-lg shadow-indigo-900/30">
+                <i data-lucide="users" class="w-4 h-4"></i>
+                <span id="modeText" class="hidden sm:inline">vs AI</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Game Workspace -->
+    <main class="w-full flex-1 flex flex-col items-center justify-center relative">
+        <!-- Scoreboard Bar -->
+        <div class="w-full max-w-xl flex justify-between items-center px-4 py-2 my-1 glass-panel rounded-xl text-xs sm:text-sm">
+            <!-- Player 1 Info -->
+            <div id="p1Card" class="flex items-center space-x-2 p-1.5 px-3 rounded-lg border border-amber-500/40 bg-amber-500/10 transition-all">
+                <div class="w-3 h-3 rounded-full bg-amber-400"></div>
+                <div>
+                    <span class="font-semibold text-slate-200">Player 1</span>
+                    <span id="p1Score" class="ml-2 font-bold text-amber-300 text-sm">0 pts</span>
+                </div>
+            </div>
+
+            <!-- Queen Status Indicator -->
+            <div class="flex flex-col items-center">
+                <span class="text-[10px] text-slate-400 uppercase tracking-widest">Queen</span>
+                <div id="queenStatus" class="flex items-center space-x-1 text-rose-400 font-medium text-xs">
+                    <span class="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block animate-pulse"></span>
+                    <span>In Play</span>
+                </div>
+            </div>
+
+            <!-- Player 2 / AI Info -->
+            <div id="p2Card" class="flex items-center space-x-2 p-1.5 px-3 rounded-lg border border-transparent transition-all">
+                <div class="w-3 h-3 rounded-full bg-slate-400"></div>
+                <div>
+                    <span id="p2Name" class="font-semibold text-slate-200">AI Bot</span>
+                    <span id="p2Score" class="ml-2 font-bold text-amber-300 text-sm">0 pts</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Canvas Game Board -->
+        <div class="board-container relative my-auto">
+            <canvas id="carromCanvas"></canvas>
+
+            <!-- Turn Banner Overlay (Shown briefly when turns switch) -->
+            <div id="turnBanner" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black/80 border border-amber-500/50 backdrop-blur-md px-6 py-2.5 rounded-2xl pointer-events-none opacity-0 transition-opacity duration-300 flex items-center space-x-2 shadow-2xl">
+                <i data-lucide="zap" class="w-5 h-5 text-amber-400"></i>
+                <span id="turnText" class="font-cinzel text-sm sm:text-lg text-amber-200 font-bold tracking-wide">Player 1's Turn</span>
+            </div>
+        </div>
+
+        <!-- Striker Positioning Control Bar -->
+        <div class="w-full max-w-md glass-panel p-3 rounded-2xl my-1 flex flex-col items-center space-y-2">
+            <div class="flex justify-between w-full px-2 text-xs text-slate-300 font-medium">
+                <span class="flex items-center gap-1"><i data-lucide="move-horizontal" class="w-3.5 h-3.5 text-amber-400"></i> Position Striker</span>
+                <span id="dragHint" class="text-amber-300/80">Pull back striker to aim & shoot</span>
+            </div>
+            <input type="range" id="strikerSlider" min="0" max="100" value="50" class="w-full cursor-pointer">
+        </div>
+    </main>
+
+    <!-- Pocketed Pieces Tray -->
+    <footer class="w-full max-w-xl glass-panel py-2 px-4 rounded-xl flex items-center justify-between text-xs z-10">
+        <span class="text-slate-400 font-medium">Pocketed:</span>
+        <div id="pocketedTray" class="flex items-center space-x-1.5 overflow-x-auto py-1">
+            <!-- Dynamic pocketed pieces will be placed here -->
+            <span class="text-slate-500 italic text-[11px]">None</span>
+        </div>
     </footer>
 
-    <!-- JavaScript for Modal & 3D Tilt Effect -->
+    <!-- Game Over Modal -->
+    <div id="gameOverModal" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 hidden">
+        <div class="glass-panel p-6 sm:p-8 rounded-3xl max-w-sm w-full mx-4 text-center border border-amber-500/30 shadow-2xl flex flex-col items-center">
+            <div class="w-16 h-16 bg-amber-500/20 rounded-full flex items-center justify-center text-amber-400 mb-4 border border-amber-500/40">
+                <i data-lucide="award" class="w-8 h-8"></i>
+            </div>
+            <h2 id="winnerText" class="font-cinzel text-2xl font-bold text-amber-300 mb-1">PLAYER 1 WINS!</h2>
+            <p id="winnerScore" class="text-sm text-slate-300 mb-6">Final Score: 450 pts</p>
+            <button id="modalPlayAgain" class="w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold rounded-xl shadow-lg shadow-amber-500/20 transition transform active:scale-95">
+                Play Again
+            </button>
+        </div>
+    </div>
+
+    <!-- CARROM GAME LOGIC & ENGINE -->
     <script>
-        // Modal Logic
-        const modal = document.getElementById('gamesModal');
-        const openBtn = document.getElementById('openGames');
-        const closeBtn = document.getElementById('closeGames');
+        // --- LUCIDE ICONS INIT ---
+        lucide.createIcons();
 
-        openBtn.addEventListener('click', () => modal.classList.add('active'));
-        closeBtn.addEventListener('click', () => modal.classList.remove('active'));
-        window.addEventListener('click', (e) => {
-            if (e.target === modal) modal.classList.remove('active');
-        });
+        // --- AUDIO SYNTHESIS ENGINE (Web Audio API) ---
+        class SoundFX {
+            constructor() {
+                this.ctx = null;
+                this.muted = false;
+            }
 
-        // 3D Tilt Effect Logic for Cards
-        const tiltCards = document.querySelectorAll('.tilt');
-        
-        tiltCards.forEach(card => {
-            card.addEventListener('mousemove', (e) => {
-                const rect = card.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                
-                const centerX = rect.width / 2;
-                const centerY = rect.height / 2;
-                
-                const rotateX = ((y - centerY) / centerY) * -15; // Max rotation 15deg
-                const rotateY = ((x - centerX) / centerX) * 15;
-                
-                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+            init() {
+                if (!this.ctx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    this.ctx = new AudioContext();
+                }
+            }
+
+            playHit(volume = 1) {
+                if (this.muted) return;
+                this.init();
+                if (!this.ctx) return;
+
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(120 + Math.random() * 60, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(30, this.ctx.currentTime + 0.08);
+
+                gain.gain.setValueAtTime(Math.min(volume, 1) * 0.8, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.08);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.08);
+            }
+
+            playPocket() {
+                if (this.muted) return;
+                this.init();
+                if (!this.ctx) return;
+
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(300, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(100, this.ctx.currentTime + 0.2);
+
+                gain.gain.setValueAtTime(0.5, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.2);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.2);
+            }
+
+            playFoul() {
+                if (this.muted) return;
+                this.init();
+                if (!this.ctx) return;
+
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(180, this.ctx.currentTime);
+                osc.frequency.setValueAtTime(110, this.ctx.currentTime + 0.1);
+
+                gain.gain.setValueAtTime(0.4, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.25);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.25);
+            }
+        }
+
+        const audio = new SoundFX();
+
+        // --- GAME CONSTANTS & CONFIGURATION ---
+        const CANVAS_SIZE = 800; // Native canvas resolution
+        const FRAME_MARGIN = 64;  // Wooden border width
+        const BOARD_INNER = CANVAS_SIZE - FRAME_MARGIN * 2;
+        const POCKET_RADIUS = 32;
+        const BASELINE_OFFSET = 110;
+
+        const PIECE_TYPES = {
+            WHITE: { color: '#fef3c7', edge: '#d97706', pts: 100, radius: 16, mass: 1 },
+            BLACK: { color: '#1e293b', edge: '#475569', pts: 50, radius: 16, mass: 1 },
+            QUEEN: { color: '#e11d48', edge: '#fb7185', pts: 300, radius: 16, mass: 1 },
+            STRIKER: { color: '#38bdf8', edge: '#0284c7', pts: 0, radius: 21, mass: 1.8 }
+        };
+
+        const FRICTION = 0.982;
+        const BOUNCE_RESTITUTION = 0.82;
+
+        // --- GAME STATE ---
+        let canvas, ctx;
+        let pieces = [];
+        let striker = null;
+        let isVsAI = true;
+        let currentPlayer = 1; // 1 or 2
+        let scores = { 1: 0, 2: 0 };
+        let queenState = 'IN_PLAY'; // IN_PLAY, POCKETED_WAITING_COVER, COVERED
+        let queenPocketedBy = null;
+        let turnPocketedPieces = [];
+        let isAiming = false;
+        let aimStart = { x: 0, y: 0 };
+        let dragCurrent = { x: 0, y: 0 };
+        let isMoving = false;
+        let gameOver = false;
+
+        // --- PIECE CLASS ---
+        class Piece {
+            constructor(x, y, type) {
+                this.x = x;
+                this.y = y;
+                this.vx = 0;
+                this.vy = 0;
+                this.type = type;
+                this.radius = type.radius;
+                this.mass = type.mass;
+                this.isPocketed = false;
+            }
+
+            update() {
+                if (this.isPocketed) return;
+
+                this.x += this.vx;
+                this.y += this.vy;
+
+                // Friction
+                this.vx *= FRICTION;
+                this.vy *= FRICTION;
+
+                // Stop subtle drift
+                if (Math.abs(this.vx) < 0.04) this.vx = 0;
+                if (Math.abs(this.vy) < 0.04) this.vy = 0;
+
+                // Cushion Collision Handling
+                const minX = FRAME_MARGIN + this.radius;
+                const maxX = CANVAS_SIZE - FRAME_MARGIN - this.radius;
+                const minY = FRAME_MARGIN + this.radius;
+                const maxY = CANVAS_SIZE - FRAME_MARGIN - this.radius;
+
+                if (this.x < minX) { this.x = minX; this.vx *= -BOUNCE_RESTITUTION; audio.playHit(0.4); }
+                if (this.x > maxX) { this.x = maxX; this.vx *= -BOUNCE_RESTITUTION; audio.playHit(0.4); }
+                if (this.y < minY) { this.y = minY; this.vy *= -BOUNCE_RESTITUTION; audio.playHit(0.4); }
+                if (this.y > maxY) { this.y = maxY; this.vy *= -BOUNCE_RESTITUTION; audio.playHit(0.4); }
+            }
+
+            draw(ctx) {
+                if (this.isPocketed) return;
+
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+
+                // Subtle shadow
+                ctx.shadowColor = 'rgba(0,0,0,0.4)';
+                ctx.shadowBlur = 8;
+                ctx.shadowOffsetY = 4;
+
+                // Piece Base Gradient
+                const grad = ctx.createRadialGradient(
+                    this.x - this.radius * 0.3, this.y - this.radius * 0.3, this.radius * 0.1,
+                    this.x, this.y, this.radius
+                );
+
+                if (this.type === PIECE_TYPES.WHITE) {
+                    grad.addColorStop(0, '#ffffff');
+                    grad.addColorStop(0.8, '#fef3c7');
+                    grad.addColorStop(1, '#d97706');
+                } else if (this.type === PIECE_TYPES.BLACK) {
+                    grad.addColorStop(0, '#475569');
+                    grad.addColorStop(0.8, '#1e293b');
+                    grad.addColorStop(1, '#0f172a');
+                } else if (this.type === PIECE_TYPES.QUEEN) {
+                    grad.addColorStop(0, '#f43f5e');
+                    grad.addColorStop(0.8, '#e11d48');
+                    grad.addColorStop(1, '#881337');
+                } else if (this.type === PIECE_TYPES.STRIKER) {
+                    grad.addColorStop(0, '#bae6fd');
+                    grad.addColorStop(0.7, '#38bdf8');
+                    grad.addColorStop(1, '#0369a1');
+                }
+
+                ctx.fillStyle = grad;
+                ctx.fill();
+
+                // Inner accent circle ring
+                ctx.shadowBlur = 0;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius * 0.55, 0, Math.PI * 2);
+                ctx.strokeStyle = this.type.edge;
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // Center Dot
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius * 0.2, 0, Math.PI * 2);
+                ctx.fillStyle = this.type.edge;
+                ctx.fill();
+
+                ctx.restore();
+            }
+        }
+
+        // --- POCKET SETUP ---
+        const pockets = [
+            { x: FRAME_MARGIN + 22, y: FRAME_MARGIN + 22 },
+            { x: CANVAS_SIZE - FRAME_MARGIN - 22, y: FRAME_MARGIN + 22 },
+            { x: FRAME_MARGIN + 22, y: CANVAS_SIZE - FRAME_MARGIN - 22 },
+            { x: CANVAS_SIZE - FRAME_MARGIN - 22, y: CANVAS_SIZE - FRAME_MARGIN - 22 }
+        ];
+
+        // --- INITIALIZATION ---
+        function initGame() {
+            canvas = document.getElementById('carromCanvas');
+            canvas.width = CANVAS_SIZE;
+            canvas.height = CANVAS_SIZE;
+            ctx = canvas.getContext('2d');
+
+            setupEvents();
+            resetBoard();
+            requestAnimationFrame(gameLoop);
+        }
+
+        function resetBoard() {
+            pieces = [];
+            scores = { 1: 0, 2: 0 };
+            queenState = 'IN_PLAY';
+            queenPocketedBy = null;
+            currentPlayer = 1;
+            gameOver = false;
+            document.getElementById('gameOverModal').classList.add('hidden');
+            updateUI();
+
+            // Center Rosette Setup (Traditional Arrangement)
+            const centerX = CANVAS_SIZE / 2;
+            const centerY = CANVAS_SIZE / 2;
+            const r = PIECE_TYPES.WHITE.radius;
+
+            // Queen in center
+            pieces.push(new Piece(centerX, centerY, PIECE_TYPES.QUEEN));
+
+            // Inner Ring: 6 pieces alternating Black & White
+            for (let i = 0; i < 6; i++) {
+                const angle = (i * Math.PI) / 3;
+                const x = centerX + Math.cos(angle) * (r * 2.05);
+                const y = centerY + Math.sin(angle) * (r * 2.05);
+                const type = (i % 2 === 0) ? PIECE_TYPES.WHITE : PIECE_TYPES.BLACK;
+                pieces.push(new Piece(x, y, type));
+            }
+
+            // Outer Ring: 12 pieces
+            for (let i = 0; i < 12; i++) {
+                const angle = (i * Math.PI) / 6 + (Math.PI / 12);
+                const x = centerX + Math.cos(angle) * (r * 4.05);
+                const y = centerY + Math.sin(angle) * (r * 4.05);
+                const type = (i % 2 === 0) ? PIECE_TYPES.BLACK : PIECE_TYPES.WHITE;
+                pieces.push(new Piece(x, y, type));
+            }
+
+            // Init Striker
+            striker = new Piece(centerX, CANVAS_SIZE - FRAME_MARGIN - BASELINE_OFFSET, PIECE_TYPES.STRIKER);
+            resetStrikerPosition();
+        }
+
+        function resetStrikerPosition() {
+            const sliderVal = document.getElementById('strikerSlider').value;
+            const minX = FRAME_MARGIN + 70;
+            const maxX = CANVAS_SIZE - FRAME_MARGIN - 70;
+            const xPos = minX + (sliderVal / 100) * (maxX - minX);
+
+            const yPos = (currentPlayer === 1) 
+                ? CANVAS_SIZE - FRAME_MARGIN - BASELINE_OFFSET 
+                : FRAME_MARGIN + BASELINE_OFFSET;
+
+            striker.x = xPos;
+            striker.y = yPos;
+            striker.vx = 0;
+            striker.vy = 0;
+            striker.isPocketed = false;
+        }
+
+        // --- DRAWING FUNCTIONS ---
+        function drawBoard() {
+            // 1. Outer Wooden Frame
+            ctx.fillStyle = '#2d1b0e';
+            ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+
+            // Wood Grain Highlights/Border depth
+            ctx.lineWidth = 6;
+            ctx.strokeStyle = '#4a2e18';
+            ctx.strokeRect(FRAME_MARGIN / 2, FRAME_MARGIN / 2, CANVAS_SIZE - FRAME_MARGIN, CANVAS_SIZE - FRAME_MARGIN);
+
+            // 2. Inner Playing Surface (Varnished Wood)
+            const surfaceGrad = ctx.createRadialGradient(
+                CANVAS_SIZE/2, CANVAS_SIZE/2, 50,
+                CANVAS_SIZE/2, CANVAS_SIZE/2, CANVAS_SIZE/2
+            );
+            surfaceGrad.addColorStop(0, '#fef3c7');
+            surfaceGrad.addColorStop(1, '#fde68a');
+
+            ctx.fillStyle = surfaceGrad;
+            ctx.fillRect(FRAME_MARGIN, FRAME_MARGIN, BOARD_INNER, BOARD_INNER);
+
+            // Inner Frame Shadow
+            ctx.lineWidth = 12;
+            ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+            ctx.strokeRect(FRAME_MARGIN + 6, FRAME_MARGIN + 6, BOARD_INNER - 12, BOARD_INNER - 12);
+
+            // 3. Four Corner Pockets
+            pockets.forEach(p => {
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, POCKET_RADIUS, 0, Math.PI * 2);
+                ctx.fillStyle = '#0f172a';
+                ctx.fill();
+
+                // Pocket Inner Shadow Ring
+                ctx.lineWidth = 4;
+                ctx.strokeStyle = '#334155';
+                ctx.stroke();
+                ctx.restore();
             });
+
+            // 4. Center Circle & Concentric Patterns
+            const cx = CANVAS_SIZE / 2;
+            const cy = CANVAS_SIZE / 2;
+
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#b45309';
+
+            // Outer Center Ring
+            ctx.beginPath();
+            ctx.arc(cx, cy, 65, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Inner Red Queen Circle
+            ctx.beginPath();
+            ctx.arc(cx, cy, 18, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(225, 29, 72, 0.2)';
+            ctx.fill();
+            ctx.strokeStyle = '#e11d48';
+            ctx.stroke();
+
+            // 5. Baselines and Circles
+            drawBaselines();
+        }
+
+        function drawBaselines() {
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#b45309';
+
+            const sides = [
+                { y: CANVAS_SIZE - FRAME_MARGIN - BASELINE_OFFSET, rot: 0 },
+                { y: FRAME_MARGIN + BASELINE_OFFSET, rot: Math.PI },
+                { x: FRAME_MARGIN + BASELINE_OFFSET, rot: -Math.PI / 2 },
+                { x: CANVAS_SIZE - FRAME_MARGIN - BASELINE_OFFSET, rot: Math.PI / 2 }
+            ];
+
+            const minOffset = FRAME_MARGIN + 70;
+            const maxOffset = CANVAS_SIZE - FRAME_MARGIN - 70;
+
+            // Draw Top and Bottom Baselines
+            [CANVAS_SIZE - FRAME_MARGIN - BASELINE_OFFSET, FRAME_MARGIN + BASELINE_OFFSET].forEach(y => {
+                ctx.beginPath();
+                ctx.moveTo(minOffset, y - 10);
+                ctx.lineTo(maxOffset, y - 10);
+                ctx.moveTo(minOffset, y + 10);
+                ctx.lineTo(maxOffset, y + 10);
+                ctx.stroke();
+
+                // Red Circle Ends
+                [minOffset, maxOffset].forEach(x => {
+                    ctx.beginPath();
+                    ctx.arc(x, y, 12, 0, Math.PI * 2);
+                    ctx.fillStyle = '#dc2626';
+                    ctx.fill();
+                    ctx.stroke();
+                });
+            });
+
+            // Draw Left and Right Baselines
+            [FRAME_MARGIN + BASELINE_OFFSET, CANVAS_SIZE - FRAME_MARGIN - BASELINE_OFFSET].forEach(x => {
+                ctx.beginPath();
+                ctx.moveTo(x - 10, minOffset);
+                ctx.lineTo(x - 10, maxOffset);
+                ctx.moveTo(x + 10, minOffset);
+                ctx.lineTo(x + 10, maxOffset);
+                ctx.stroke();
+
+                // Red Circle Ends
+                [minOffset, maxOffset].forEach(y => {
+                    ctx.beginPath();
+                    ctx.arc(x, y, 12, 0, Math.PI * 2);
+                    ctx.fillStyle = '#dc2626';
+                    ctx.fill();
+                    ctx.stroke();
+                });
+            });
+        }
+
+        function drawAimLine() {
+            if (!isAiming || isMoving) return;
+
+            const dx = aimStart.x - dragCurrent.x;
+            const dy = aimStart.y - dragCurrent.y;
+            const dist = Math.hypot(dx, dy);
+
+            if (dist < 10) return;
+
+            // Pullback trajectory prediction line
+            const power = Math.min(dist * 0.18, 28);
+            const angle = Math.atan2(dy, dx);
+
+            ctx.save();
+            ctx.setLineDash([8, 6]);
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = 'rgba(251, 191, 36, 0.8)';
+
+            ctx.beginPath();
+            ctx.moveTo(striker.x, striker.y);
+            ctx.lineTo(striker.x + Math.cos(angle) * power * 12, striker.y + Math.sin(angle) * power * 12);
+            ctx.stroke();
+
+            // Elastic Slingshot Line
+            ctx.restore();
+            ctx.beginPath();
+            ctx.moveTo(striker.x, striker.y);
+            ctx.lineTo(dragCurrent.x, dragCurrent.y);
+            ctx.lineWidth = 4;
+            ctx.strokeStyle = 'rgba(239, 68, 68, 0.7)';
+            ctx.stroke();
+        }
+
+        // --- PHYSICS & COLLISION ENGINE ---
+        function updatePhysics() {
+            let activeMotion = false;
+
+            // Combine Striker + Pieces
+            const allPieces = [...pieces, striker];
+
+            allPieces.forEach(p => {
+                if (!p.isPocketed) {
+                    p.update();
+                    if (Math.hypot(p.vx, p.vy) > 0.05) activeMotion = true;
+                }
+            });
+
+            // Piece to Piece Collisions
+            for (let i = 0; i < allPieces.length; i++) {
+                for (let j = i + 1; j < allPieces.length; j++) {
+                    const p1 = allPieces[i];
+                    const p2 = allPieces[j];
+
+                    if (p1.isPocketed || p2.isPocketed) continue;
+
+                    const dx = p2.x - p1.x;
+                    const dy = p2.y - p1.y;
+                    const dist = Math.hypot(dx, dy);
+                    const minDist = p1.radius + p2.radius;
+
+                    if (dist < minDist) {
+                        // Collision Resolution (Elastic 2D)
+                        const overlap = minDist - dist;
+                        const nx = dx / (dist || 1);
+                        const ny = dy / (dist || 1);
+
+                        // Separate overlapping bodies
+                        p1.x -= nx * overlap * 0.5;
+                        p1.y -= ny * overlap * 0.5;
+                        p2.x += nx * overlap * 0.5;
+                        p2.y += ny * overlap * 0.5;
+
+                        // Relative velocity
+                        const kx = p1.vx - p2.vx;
+                        const ky = p1.vy - p2.vy;
+                        const p = 2 * (nx * kx + ny * ky) / (p1.mass + p2.mass);
+
+                        p1.vx -= p * p2.mass * nx;
+                        p1.vy -= p * p2.mass * ny;
+                        p2.vx += p * p1.mass * nx;
+                        p2.vy += p * p1.mass * ny;
+
+                        // Trigger Sound
+                        const impactVel = Math.hypot(kx, ky);
+                        if (impactVel > 0.5) {
+                            audio.playHit(impactVel / 15);
+                        }
+                    }
+                }
+            }
+
+            // Check Pocket Hits
+            allPieces.forEach(p => {
+                if (p.isPocketed) return;
+
+                pockets.forEach(pkt => {
+                    const dist = Math.hypot(p.x - pkt.x, p.y - pkt.y);
+                    if (dist < POCKET_RADIUS - 6) {
+                        p.isPocketed = true;
+                        p.vx = 0;
+                        p.vy = 0;
+                        audio.playPocket();
+
+                        if (p !== striker) {
+                            turnPocketedPieces.push(p);
+                        }
+                    }
+                });
+            });
+
+            // Handle Shot Completion
+            if (isMoving && !activeMotion) {
+                isMoving = false;
+                processTurnEnd();
+            }
+        }
+
+        // --- GAME LOGIC & TURN RULES ---
+        function processTurnEnd() {
+            let foul = false;
+
+            // Check Striker Foul
+            if (striker.isPocketed) {
+                foul = true;
+                scores[currentPlayer] = Math.max(0, scores[currentPlayer] - 50);
+                audio.playFoul();
+                showBanner("STRIKER FOUL! -50 pts");
+            }
+
+            // Process Pocketed Pieces
+            let earnedPoints = 0;
+            let extraTurn = false;
+
+            turnPocketedPieces.forEach(piece => {
+                if (piece.type === PIECE_TYPES.QUEEN) {
+                    queenState = 'POCKETED_WAITING_COVER';
+                    queenPocketedBy = currentPlayer;
+                    extraTurn = true;
+                    showBanner("QUEEN POCKETED! Cover required.");
+                } else {
+                    earnedPoints += piece.type.pts;
+                    extraTurn = true;
+                }
+            });
+
+            // Queen Cover Validation Logic
+            if (queenState === 'POCKETED_WAITING_COVER' && queenPocketedBy === currentPlayer) {
+                const coverPiece = turnPocketedPieces.find(p => p.type !== PIECE_TYPES.QUEEN);
+                if (coverPiece) {
+                    queenState = 'COVERED';
+                    earnedPoints += PIECE_TYPES.QUEEN.pts;
+                    showBanner("QUEEN COVERED! +300 pts");
+                } else if (turnPocketedPieces.length === 1 && turnPocketedPieces[0].type === PIECE_TYPES.QUEEN) {
+                    // Pocketed queen alone, need to cover on NEXT shot or re-spot
+                    // Turn continues for cover attempt
+                } else {
+                    // Failed cover on subsequent turn -> Respot Queen
+                    respotQueen();
+                }
+            }
+
+            scores[currentPlayer] += earnedPoints;
+
+            // Check Win Condition
+            const remainingCarromMen = pieces.filter(p => !p.isPocketed && p.type !== PIECE_TYPES.STRIKER);
+            if (remainingCarromMen.length === 0) {
+                endGame();
+                return;
+            }
+
+            // Switch Turns if no valid piece pocketed or foul occurred
+            if (!extraTurn || foul) {
+                if (queenState === 'POCKETED_WAITING_COVER' && queenPocketedBy !== null && queenPocketedBy !== currentPlayer) {
+                    respotQueen();
+                }
+                currentPlayer = currentPlayer === 1 ? 2 : 1;
+                showBanner(currentPlayer === 1 ? "Player 1's Turn" : (isVsAI ? "AI's Turn" : "Player 2's Turn"));
+            }
+
+            // Reset for next shot
+            turnPocketedPieces = [];
+            resetStrikerPosition();
+            updateUI();
+
+            // Trigger AI if applicable
+            if (isVsAI && currentPlayer === 2 && !gameOver) {
+                setTimeout(makeAIMove, 1000);
+            }
+        }
+
+        function respotQueen() {
+            const q = pieces.find(p => p.type === PIECE_TYPES.QUEEN);
+            if (q) {
+                q.isPocketed = false;
+                q.x = CANVAS_SIZE / 2;
+                q.y = CANVAS_SIZE / 2;
+                q.vx = 0;
+                q.vy = 0;
+                queenState = 'IN_PLAY';
+                queenPocketedBy = null;
+                showBanner("QUEEN RETURNED TO BOARD");
+            }
+        }
+
+        // --- AI LOGIC ENGINE ---
+        function makeAIMove() {
+            if (gameOver || currentPlayer !== 2) return;
+
+            // Find target piece (prioritize Queen or easiest White/Black piece)
+            const available = pieces.filter(p => !p.isPocketed);
+            if (available.length === 0) return;
+
+            // Pick a random piece to target
+            let target = available.find(p => p.type === PIECE_TYPES.QUEEN) || available[Math.floor(Math.random() * available.length)];
+
+            // Position Striker automatically on baseline
+            const minX = FRAME_MARGIN + 80;
+            const maxX = CANVAS_SIZE - FRAME_MARGIN - 80;
+            striker.x = minX + Math.random() * (maxX - minX);
+            striker.y = FRAME_MARGIN + BASELINE_OFFSET;
+
+            // Aim towards target with slight random variance for realistic play
+            const angle = Math.atan2(target.y - striker.y, target.x - striker.x) + (Math.random() - 0.5) * 0.15;
+            const power = 14 + Math.random() * 10;
+
+            striker.vx = Math.cos(angle) * power;
+            striker.vy = Math.sin(angle) * power;
+            isMoving = true;
+            audio.playHit(0.8);
+        }
+
+        // --- MAIN GAME LOOP ---
+        function gameLoop() {
+            ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+
+            drawBoard();
+            updatePhysics();
+
+            // Draw Pieces & Striker
+            pieces.forEach(p => p.draw(ctx));
+            if (!striker.isPocketed) striker.draw(ctx);
+
+            drawAimLine();
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        // --- UI & CONTROLS INTERACTION ---
+        function setupEvents() {
+            const slider = document.getElementById('strikerSlider');
             
-            card.addEventListener('mouseleave', () => {
-                card.style.transform = `perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)`;
-                card.style.transition = "transform 0.5s ease";
+            slider.addEventListener('input', () => {
+                if (!isMoving) resetStrikerPosition();
             });
-            
-            card.addEventListener('mouseenter', () => {
-                card.style.transition = "transform 0.1s ease"; // Fast response on enter
+
+            // Pointer / Touch Interactions for Aiming
+            canvas.addEventListener('pointerdown', (e) => {
+                if (isMoving || (isVsAI && currentPlayer === 2)) return;
+
+                const rect = canvas.getBoundingClientRect();
+                const scale = CANVAS_SIZE / rect.width;
+                const px = (e.clientX - rect.left) * scale;
+                const py = (e.clientY - rect.top) * scale;
+
+                // Check distance to striker
+                if (Math.hypot(px - striker.x, py - striker.y) < striker.radius * 2.5) {
+                    isAiming = true;
+                    aimStart = { x: striker.x, y: striker.y };
+                    dragCurrent = { x: px, y: py };
+                }
             });
-        });
+
+            canvas.addEventListener('pointermove', (e) => {
+                if (!isAiming) return;
+                const rect = canvas.getBoundingClientRect();
+                const scale = CANVAS_SIZE / rect.width;
+                dragCurrent = {
+                    x: (e.clientX - rect.left) * scale,
+                    y: (e.clientY - rect.top) * scale
+                };
+            });
+
+            canvas.addEventListener('pointerup', () => {
+                if (!isAiming) return;
+                isAiming = false;
+
+                const dx = aimStart.x - dragCurrent.x;
+                const dy = aimStart.y - dragCurrent.y;
+                const dist = Math.hypot(dx, dy);
+
+                if (dist > 12) {
+                    const power = Math.min(dist * 0.16, 26);
+                    const angle = Math.atan2(dy, dx);
+
+                    striker.vx = Math.cos(angle) * power;
+                    striker.vy = Math.sin(angle) * power;
+                    isMoving = true;
+                    audio.playHit(1);
+                }
+            });
+
+            // Button Click Listeners
+            document.getElementById('restartBtn').addEventListener('click', resetBoard);
+            document.getElementById('modalPlayAgain').addEventListener('click', resetBoard);
+
+            document.getElementById('modeBtn').addEventListener('click', () => {
+                isVsAI = !isVsAI;
+                document.getElementById('modeText').textContent = isVsAI ? 'vs AI' : '2 Player';
+                document.getElementById('p2Name').textContent = isVsAI ? 'AI Bot' : 'Player 2';
+                resetBoard();
+            });
+
+            document.getElementById('audioToggle').addEventListener('click', () => {
+                audio.muted = !audio.muted;
+                document.getElementById('soundIcon').setAttribute('data-lucide', audio.muted ? 'volume-x' : 'volume-2');
+                lucide.createIcons();
+            });
+        }
+
+        function updateUI() {
+            document.getElementById('p1Score').textContent = `${scores[1]} pts`;
+            document.getElementById('p2Score').textContent = `${scores[2]} pts`;
+
+            // Player Cards Highlight
+            const p1Card = document.getElementById('p1Card');
+            const p2Card = document.getElementById('p2Card');
+
+            if (currentPlayer === 1) {
+                p1Card.className = "flex items-center space-x-2 p-1.5 px-3 rounded-lg border border-amber-500/50 bg-amber-500/20 shadow-lg transition-all";
+                p2Card.className = "flex items-center space-x-2 p-1.5 px-3 rounded-lg border border-transparent transition-all opacity-60";
+            } else {
+                p2Card.className = "flex items-center space-x-2 p-1.5 px-3 rounded-lg border border-indigo-500/50 bg-indigo-500/20 shadow-lg transition-all";
+                p1Card.className = "flex items-center space-x-2 p-1.5 px-3 rounded-lg border border-transparent transition-all opacity-60";
+            }
+
+            // Queen Status Label
+            const queenElem = document.getElementById('queenStatus');
+            if (queenState === 'IN_PLAY') {
+                queenElem.innerHTML = `<span class="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block animate-pulse"></span><span>In Play</span>`;
+            } else if (queenState === 'POCKETED_WAITING_COVER') {
+                queenElem.innerHTML = `<span class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span><span>Needs Cover</span>`;
+            } else {
+                queenElem.innerHTML = `<span class="w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block"></span><span>Covered</span>`;
+            }
+
+            // Update Pocketed Pieces Tray Display
+            const tray = document.getElementById('pocketedTray');
+            tray.innerHTML = '';
+            const pocketed = pieces.filter(p => p.isPocketed);
+
+            if (pocketed.length === 0) {
+                tray.innerHTML = `<span class="text-slate-500 italic text-[11px]">None</span>`;
+            } else {
+                pocketed.forEach(p => {
+                    const dot = document.createElement('div');
+                    dot.className = "w-4 h-4 rounded-full border border-slate-600 shadow-sm flex-shrink-0";
+                    if (p.type === PIECE_TYPES.WHITE) dot.style.backgroundColor = '#fef3c7';
+                    else if (p.type === PIECE_TYPES.BLACK) dot.style.backgroundColor = '#1e293b';
+                    else if (p.type === PIECE_TYPES.QUEEN) dot.style.backgroundColor = '#e11d48';
+                    tray.appendChild(dot);
+                });
+            }
+        }
+
+        function showBanner(text) {
+            const banner = document.getElementById('turnBanner');
+            document.getElementById('turnText').textContent = text;
+            banner.classList.remove('opacity-0');
+            setTimeout(() => {
+                banner.classList.add('opacity-0');
+            }, 1800);
+        }
+
+        function endGame() {
+            gameOver = true;
+            const modal = document.getElementById('gameOverModal');
+            const winnerTxt = document.getElementById('winnerText');
+            const scoreTxt = document.getElementById('winnerScore');
+
+            let winnerName = "PLAYER 1";
+            let maxScore = scores[1];
+
+            if (scores[2] > scores[1]) {
+                winnerName = isVsAI ? "AI BOT" : "PLAYER 2";
+                maxScore = scores[2];
+            } else if (scores[1] === scores[2]) {
+                winnerName = "IT'S A TIE!";
+            }
+
+            winnerTxt.textContent = `${winnerName} WINS!`;
+            scoreTxt.textContent = `High Score: ${maxScore} pts`;
+            modal.classList.remove('hidden');
+        }
+
+        // Start Game on Page Load
+        window.onload = initGame;
     </script>
 </body>
 </html>
