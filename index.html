@@ -3,53 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Studio</title>
+    <title>AI Studio | Next Gen</title>
     <style>
-        /* Modern Dark Theme Styling */
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap');
+        /* Very Very Modern Styling */
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap');
+
+        :root {
+            --bg-color: #030305;
+            --card-bg: rgba(20, 20, 25, 0.6);
+            --text-main: #ffffff;
+            --text-muted: #8b8b9e;
+            --accent-1: #8A2BE2; /* Purple */
+            --accent-2: #00FFFF; /* Cyan */
+            --accent-3: #FF007F; /* Pink */
+        }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Space Grotesk', sans-serif;
+            cursor: default;
         }
 
         body {
-            background: #0a0a0a;
-            color: #ffffff;
+            background-color: var(--bg-color);
+            color: var(--text-main);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             overflow-x: hidden;
-            background-image: radial-gradient(circle at 15% 50%, rgba(76, 29, 149, 0.15), transparent 25%),
-                              radial-gradient(circle at 85% 30%, rgba(14, 165, 233, 0.15), transparent 25%);
+            position: relative;
+        }
+
+        /* Animated Background Orbs */
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(120px);
+            z-index: -1;
+            opacity: 0.6;
+            animation: floatOrb 10s infinite alternate ease-in-out;
+        }
+        .orb-1 { width: 400px; height: 400px; background: var(--accent-1); top: -10%; left: -10%; }
+        .orb-2 { width: 300px; height: 300px; background: var(--accent-2); bottom: -10%; right: -10%; animation-delay: -5s; }
+        .orb-3 { width: 250px; height: 250px; background: var(--accent-3); top: 40%; left: 60%; animation-delay: -2s; opacity: 0.4; }
+
+        @keyframes floatOrb {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(50px, 50px) scale(1.2); }
         }
 
         header {
             width: 100%;
-            padding: 30px;
+            padding: 40px 20px;
             text-align: center;
+            z-index: 10;
         }
 
         header h1 {
-            font-size: 3rem;
-            font-weight: 800;
-            letter-spacing: 2px;
-            background: linear-gradient(90deg, #a855f7, #3b82f6, #2dd4bf);
+            font-size: 4rem;
+            font-weight: 700;
+            letter-spacing: -2px;
+            background: linear-gradient(to right, #fff, var(--accent-2), var(--accent-1), #fff);
+            background-size: 300% auto;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            animation: shine 5s linear infinite;
             text-transform: uppercase;
-            animation: glow 3s ease-in-out infinite alternate;
         }
 
-        @keyframes glow {
-            from { filter: drop-shadow(0 0 10px rgba(168, 85, 247, 0.4)); }
-            to { filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.6)); }
+        @keyframes shine {
+            to { background-position: 300% center; }
         }
 
-        /* Main Container */
         .container {
             flex: 1;
             display: flex;
@@ -59,231 +87,338 @@
             width: 100%;
             max-width: 1000px;
             padding: 20px;
+            perspective: 1000px; /* For 3D effect */
         }
 
-        /* Cards Container */
         .cards {
             display: flex;
-            gap: 30px;
+            gap: 40px;
             flex-wrap: wrap;
             justify-content: center;
-            margin-bottom: 50px;
+            margin-bottom: 60px;
         }
 
-        /* Modern Glassmorphism Card */
-        .card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 40px;
-            width: 300px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.4s ease;
+        /* 3D Glowing Card Wrapper */
+        .card-wrapper {
             position: relative;
-            overflow: hidden;
+            width: 320px;
+            height: 380px;
+            border-radius: 24px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0));
+            padding: 2px; /* Border width */
+            transition: transform 0.1s ease, box-shadow 0.3s ease;
+            transform-style: preserve-3d;
             text-decoration: none;
-            color: white;
         }
 
-        .card::before {
-            content: '';
+        /* Animated Border Glow */
+        .card-wrapper::before {
+            content: "";
             position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
-            transform: translateX(-100%);
-            transition: 0.5s;
+            inset: 0;
+            border-radius: 24px;
+            background: conic-gradient(from var(--angle), transparent 40%, var(--accent-2), var(--accent-1), transparent 60%);
+            animation: rotateBorder 4s linear infinite;
+            z-index: -1;
+            opacity: 0.5;
+            transition: opacity 0.3s ease;
+        }
+        
+        .card-wrapper:hover::before {
+            opacity: 1;
         }
 
-        .card:hover::before {
-            transform: translateX(100%);
+        @property --angle {
+            syntax: '<angle>';
+            initial-value: 0deg;
+            inherits: false;
+        }
+
+        @keyframes rotateBorder {
+            to { --angle: 360deg; }
+        }
+
+        /* Inner Glass Card */
+        .card {
+            background: rgba(10, 10, 15, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 22px;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            text-align: center;
+            transform: translateZ(30px); /* 3D pop out */
+            transition: background 0.3s ease;
         }
 
         .card:hover {
-            transform: translateY(-10px);
-            border-color: rgba(168, 85, 247, 0.5);
-            box-shadow: 0 10px 30px rgba(168, 85, 247, 0.2);
+            background: rgba(15, 15, 25, 0.9);
         }
 
         .card-icon {
-            font-size: 4rem;
+            font-size: 5rem;
             margin-bottom: 20px;
-            display: inline-block;
-            animation: float 3s ease-in-out infinite;
+            filter: drop-shadow(0 0 20px rgba(0, 255, 255, 0.5));
+            transform: translateZ(50px); /* More 3D pop */
+            transition: transform 0.3s ease;
         }
 
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+        .card-wrapper:hover .card-icon {
+            transform: translateZ(70px) scale(1.1);
         }
 
         .card h2 {
-            font-size: 1.5rem;
-            margin-bottom: 10px;
+            font-size: 1.8rem;
+            margin-bottom: 15px;
             color: #fff;
+            transform: translateZ(40px);
         }
 
         .card p {
-            font-size: 0.9rem;
-            color: #a1a1aa;
+            font-size: 1rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+            transform: translateZ(20px);
         }
 
-        /* Offline Games Button */
+        /* Ultra Modern Games Button */
         .games-btn {
-            background: linear-gradient(90deg, #7c3aed, #2563eb);
+            position: relative;
+            background: rgba(255, 255, 255, 0.05);
             color: white;
-            border: none;
-            padding: 15px 40px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 18px 50px;
             font-size: 1.2rem;
-            font-weight: 600;
+            font-weight: 700;
+            letter-spacing: 1px;
             border-radius: 50px;
             cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);
+            transition: all 0.4s ease;
+            backdrop-filter: blur(10px);
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 15px;
+            overflow: hidden;
+            z-index: 1;
         }
 
+        .games-btn::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(90deg, var(--accent-1), var(--accent-3));
+            z-index: -1;
+            transition: opacity 0.4s ease;
+            opacity: 0;
+        }
+
+        .games-btn:hover::before { opacity: 1; }
         .games-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 6px 20px rgba(124, 58, 237, 0.6);
+            box-shadow: 0 0 30px rgba(255, 0, 127, 0.5);
+            border-color: transparent;
+            transform: translateY(-3px);
         }
 
-        /* Modal for Offline Games */
+        /* Epic Modal for Games */
         .modal {
-            display: none;
+            display: flex;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(5px);
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
             z-index: 1000;
             justify-content: center;
             align-items: center;
             opacity: 0;
-            transition: opacity 0.3s ease;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
         }
 
         .modal.active {
-            display: flex;
             opacity: 1;
+            pointer-events: auto;
         }
 
         .modal-content {
-            background: #121212;
+            background: rgba(15, 15, 20, 0.9);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 30px;
-            border-radius: 20px;
+            padding: 40px;
+            border-radius: 30px;
             width: 90%;
-            max-width: 500px;
-            text-align: center;
+            max-width: 600px;
             position: relative;
-            transform: scale(0.9);
-            transition: transform 0.3s ease;
+            transform: translateY(50px) scale(0.95);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
         }
 
         .modal.active .modal-content {
-            transform: scale(1);
+            transform: translateY(0) scale(1);
         }
 
         .close-btn {
             position: absolute;
-            top: 15px; right: 20px;
-            font-size: 1.5rem;
+            top: 20px; right: 25px;
+            font-size: 2rem;
             cursor: pointer;
-            color: #a1a1aa;
+            color: var(--text-muted);
             transition: 0.3s;
+            line-height: 1;
         }
 
-        .close-btn:hover { color: #fff; }
+        .close-btn:hover { color: var(--accent-3); transform: rotate(90deg); }
 
-        .modal h2 { margin-bottom: 20px; color: #fff; }
+        .modal h2 { 
+            margin-bottom: 30px; 
+            color: #fff; 
+            font-size: 2rem;
+            text-align: center;
+            background: linear-gradient(to right, var(--accent-2), var(--accent-1));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
 
-        .games-list {
-            list-style: none;
-            display: flex;
-            flex-direction: column;
+        /* Games Grid Layout */
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
         }
 
-        .games-list li a {
-            display: block;
-            background: rgba(255, 255, 255, 0.05);
-            padding: 15px;
-            border-radius: 10px;
+        .game-link {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 20px;
+            border-radius: 15px;
             text-decoration: none;
-            color: #d4d4d8;
-            font-weight: 600;
-            transition: 0.3s;
-            border: 1px solid transparent;
+            color: #fff;
+            font-weight: 500;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        .games-list li a:hover {
+        .game-link:hover {
             background: rgba(255, 255, 255, 0.1);
-            border-color: #3b82f6;
-            color: #fff;
-            transform: translateX(5px);
+            border-color: var(--accent-2);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 255, 255, 0.1);
+        }
+
+        .game-icon {
+            font-size: 1.5rem;
         }
 
         /* Responsive */
         @media (max-width: 768px) {
-            header h1 { font-size: 2rem; }
-            .card { width: 100%; max-width: 350px; }
+            header h1 { font-size: 2.5rem; }
+            .cards { flex-direction: column; align-items: center; }
+            .card-wrapper { width: 100%; max-width: 350px; height: 350px; }
+            .games-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
 
+    <!-- Animated Background Orbs -->
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+
     <header>
         <h1>AI Studio</h1>
-                <h2>CREATED BY Saith Rehman Ali</h2>
+        <h2>Saith Rehman Ali</h2>
 
     </header>
 
     <div class="container">
         <div class="cards">
-            <!-- AI Chat Card (Links to chat.html) -->
-            <a href="chat.html" class="card">
-                <div class="card-icon">💬</div>
-                <h2>AI Chat</h2>
-                <p>Chat with our intelligent AI assistant.</p>
+            <!-- AI Chat Card -->
+            <a href="chat.html" class="card-wrapper tilt">
+                <div class="card">
+                    <div class="card-icon">🧠</div>
+                    <h2>AI Chat</h2>
+                    <p>Experience next-level conversation with our advanced neural AI.</p>
+                </div>
             </a>
 
-            <!-- Image Generator Card (Links to image.html) -->
-            <a href="image.html" class="card">
-                <div class="card-icon">🎨</div>
-                <h2>Image Generator AI</h2>
-                <p>Generate stunning images from text prompts.</p>
+            <!-- Image Generator Card -->
+            <a href="image.html" class="card-wrapper tilt">
+                <div class="card">
+                    <div class="card-icon">✨</div>
+                    <h2>Image AI</h2>
+                    <p>Transform your imagination into breathtaking visuals instantly.</p>
+                </div>
             </a>
         </div>
 
-        
+        <!-- Offline Games Button -->
+        <button class="games-btn" id="openGames">
+            <span>🎮</span> OFFLINE GAMES
+        </button>
     </div>
 
-   
-    <!-- JavaScript for Modal Functionality -->
+    <!-- Offline Games Modal -->
+    <div class="modal" id="gamesModal">
+        <div class="modal-content">
+            <span class="close-btn" id="closeGames">&times;</span>
+            <h2>Select a Game</h2>
+            <div class="games-grid">
+                <a href="Flappy-Bird.html" class="game-link"><span class="game-icon">🐦</span> Flappy Bird</a>
+                <a href="tic-cross.html" class="game-link"><span class="game-icon">❌</span> Tic Tac Toe</a>
+                <a href="tic-cros-2.html" class="game-link"><span class="game-icon">⭕</span> Tic Tac Toe V2</a>
+                <a href="diano2.html" class="game-link"><span class="game-icon">🦖</span> Diano Runner</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript for Modal & 3D Tilt Effect -->
     <script>
+        // Modal Logic
         const modal = document.getElementById('gamesModal');
         const openBtn = document.getElementById('openGames');
         const closeBtn = document.getElementById('closeGames');
 
-        // Open Modal
-        openBtn.addEventListener('click', () => {
-            modal.classList.add('active');
-        });
-
-        // Close Modal via X button
-        closeBtn.addEventListener('click', () => {
-            modal.classList.remove('active');
-        });
-
-        // Close Modal by clicking outside the box
+        openBtn.addEventListener('click', () => modal.classList.add('active'));
+        closeBtn.addEventListener('click', () => modal.classList.remove('active'));
         window.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                modal.classList.remove('active');
-            }
+            if (e.target === modal) modal.classList.remove('active');
+        });
+
+        // 3D Tilt Effect Logic for Cards
+        const tiltCards = document.querySelectorAll('.tilt');
+        
+        tiltCards.forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                
+                const rotateX = ((y - centerY) / centerY) * -15; // Max rotation 15deg
+                const rotateY = ((x - centerX) / centerX) * 15;
+                
+                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+            });
+            
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = `perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)`;
+                card.style.transition = "transform 0.5s ease";
+            });
+            
+            card.addEventListener('mouseenter', () => {
+                card.style.transition = "transform 0.1s ease"; // Fast response on enter
+            });
         });
     </script>
 </body>
