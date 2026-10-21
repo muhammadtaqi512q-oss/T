@@ -1,52 +1,53 @@
-name: Build and Deploy Nexura Flask App
+name: Build Clean APK with Icon
 
 on:
   push:
-    branches:
-      - main
-
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: "pages"
-  cancel-in-progress: true
+    branches: [ main ]
+  workflow_dispatch:
 
 jobs:
-  build-and-deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
+      - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Setup Java JDK
+        uses: actions/setup-java@v4
         with:
-          python-version: '3.10'
+          distribution: 'zulu'
+          java-version: '17'
 
-      - name: Install Dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install flask
-
-      - name: Build Static Files via Flask
-        run: |
-          python build.py
-
-      - name: Setup GitHub Pages
-        uses: actions/configure-pages@v4
-
-      - name: Upload Artifacts
-        uses: actions/upload-pages-artifact@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          path: 'dist'
+          node-version: 18
 
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Install Cordova & Build APK with Icon
+        run: |
+          npm install -g cordova
+          
+          # 1. Create Cordova project
+          cordova create app com.aistudio.rehman "AI STUDIO"
+          
+          # 2. Copy ALL HTML and web files to www folder
+          cp -r *.html *.png *.jpg *.jpeg *.css *.js app/www/ 2>/dev/null || true
+          # cp -r css js images app/www/ 2>/dev/null || true
+          
+          # 3. Add Custom Icon to Config if icon.png exists
+          if [ -f "icon.png" ]; then
+            cp icon.png app/www/icon.png
+            sed -i '/<\/widget>/i \    <icon src="www/icon.png" />' app/config.xml
+          fi
+          
+          # 4. Add Android Platform & Build
+          cd app
+          cordova platform add android
+          cordova build android --debug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: AI-APP-APK
+          path: app/platforms/android/app/build/outputs/apk/debug/app-debug.apk
