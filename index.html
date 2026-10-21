@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Studio</title>
+    <style>
+        /* Modern Dark Theme Styling */
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: #0a0a0a;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+            background-image: radial-gradient(circle at 15% 50%, rgba(76, 29, 149, 0.15), transparent 25%),
+                              radial-gradient(circle at 85% 30%, rgba(14, 165, 233, 0.15), transparent 25%);
+        }
+
+        header {
+            width: 100%;
+            padding: 30px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            letter-spacing: 2px;
+            background: linear-gradient(90deg, #a855f7, #3b82f6, #2dd4bf);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+            animation: glow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { filter: drop-shadow(0 0 10px rgba(168, 85, 247, 0.4)); }
+            to { filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.6)); }
+        }
+
+        /* Main Container */
+        .container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 1000px;
+            padding: 20px;
+        }
+
+        /* Cards Container */
+        .cards {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 50px;
+        }
+
+        /* Modern Glassmorphism Card */
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            width: 300px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            text-decoration: none;
+            color: white;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: translateX(-100%);
+            transition: 0.5s;
+        }
+
+        .card:hover::before {
+            transform: translateX(100%);
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(168, 85, 247, 0.5);
+            box-shadow: 0 10px 30px rgba(168, 85, 247, 0.2);
+        }
+
+        .card-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            display: inline-block;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .card h2 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        .card p {
+            font-size: 0.9rem;
+            color: #a1a1aa;
+        }
+
+        /* Offline Games Button */
+        .games-btn {
+            background: linear-gradient(90deg, #7c3aed, #2563eb);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .games-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(124, 58, 237, 0.6);
+        }
+
+        /* Modal for Offline Games */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: #121212;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+            position: relative;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .modal.active .modal-content {
+            transform: scale(1);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px; right: 20px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #a1a1aa;
+            transition: 0.3s;
+        }
+
+        .close-btn:hover { color: #fff; }
+
+        .modal h2 { margin-bottom: 20px; color: #fff; }
+
+        .games-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .games-list li a {
+            display: block;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 10px;
+            text-decoration: none;
+            color: #d4d4d8;
+            font-weight: 600;
+            transition: 0.3s;
+            border: 1px solid transparent;
+        }
+
+        .games-list li a:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #3b82f6;
+            color: #fff;
+            transform: translateX(5px);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            header h1 { font-size: 2rem; }
+            .card { width: 100%; max-width: 350px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>AI Studio</h1>
+                <h2>CREATED BY Saith Rehman Ali</h2>
+
+    </header>
+
+    <div class="container">
+        <div class="cards">
+            <!-- AI Chat Card (Links to chat.html) -->
+            <a href="chat.html" class="card">
+                <div class="card-icon">💬</div>
+                <h2>AI Chat</h2>
+                <p>Chat with our intelligent AI assistant.</p>
+            </a>
+
+            <!-- Image Generator Card (Links to image.html) -->
+            <a href="image.html" class="card">
+                <div class="card-icon">🎨</div>
+                <h2>Image Generator AI</h2>
+                <p>Generate stunning images from text prompts.</p>
+            </a>
+        </div>
+
+        <!-- Offline Games Button -->
+        <button class="games-btn" id="openGames">
+            🎮 Offline Games
+        </button>
+    </div>
+
+    <!-- Offline Games Modal -->
+    <div class="modal" id="gamesModal">
+        <div class="modal-content">
+            <span class="close-btn" id="closeGames">&times;</span>
+            <h2>Select a Game</h2>
+            <ul class="games-list">
+                <!-- Links based on your GitHub screenshot -->
+                <li><a href="Flappy-Bird.html">🐦 Flappy Bird</a></li>
+                <li><a href="tic-cross.html">❌ Tic Tac Toe ⭕</a></li>
+                <li><a href="tic-cros-2.html">❌ Tic Tac Toe (V2) ⭕</a></li>
+                <li><a href="diano2.html">🦖 Diano Game</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- JavaScript for Modal Functionality -->
+    <script>
+        const modal = document.getElementById('gamesModal');
+        const openBtn = document.getElementById('openGames');
+        const closeBtn = document.getElementById('closeGames');
+
+        // Open Modal
+        openBtn.addEventListener('click', () => {
+            modal.classList.add('active');
+        });
+
+        // Close Modal via X button
+        closeBtn.addEventListener('click', () => {
+            modal.classList.remove('active');
+        });
+
+        // Close Modal by clicking outside the box
+        window.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>
