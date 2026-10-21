@@ -29,7 +29,7 @@ jobs:
           npm install -g cordova
           
           # 1. Create Cordova project
-          cordova create app com.aistudio.rehman "AI STUDIO"
+          cordova create app com.game.re "CARROM"
           
           # 2. Copy ALL HTML and web files to www folder
           cp -r *.html *.png *.jpg *.jpeg *.css *.js app/www/ 2>/dev/null || true
