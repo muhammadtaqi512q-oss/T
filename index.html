@@ -317,12 +317,48 @@
             font-size: 1.5rem;
         }
 
+        /* --- NEW: Creator Footer Styling --- */
+        .site-footer {
+            width: 100%;
+            text-align: center;
+            padding: 30px 20px;
+            margin-top: auto; /* Pushes footer to the bottom */
+            font-size: 1rem;
+            color: var(--text-muted);
+            letter-spacing: 2px;
+            z-index: 10;
+            position: relative;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+
+        .creator-name {
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--accent-2), var(--accent-1), var(--accent-3));
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shine 3s linear infinite;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-block;
+            margin-left: 8px;
+            font-size: 1.1rem;
+        }
+
+        .creator-name:hover {
+            filter: drop-shadow(0 0 12px var(--accent-2));
+            transform: translateY(-2px) scale(1.05);
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             header h1 { font-size: 2.5rem; }
             .cards { flex-direction: column; align-items: center; }
             .card-wrapper { width: 100%; max-width: 350px; height: 350px; }
             .games-grid { grid-template-columns: 1fr; }
+            .site-footer { font-size: 0.8rem; }
+            .creator-name { font-size: 0.9rem; }
         }
     </style>
 </head>
@@ -335,7 +371,7 @@
 
     <header>
         <h1>AI Studio</h1>
-        <h2>Saith Rehman Ali</h2>
+                <h1>created by muhammad taqi</h1>
 
     </header>
 
@@ -379,6 +415,11 @@
             </div>
         </div>
     </div>
+
+    <!-- NEW: Created By Footer -->
+    <footer class="site-footer">
+        Created by <span class="creator-name">Muhammad Taqi</span>
+    </footer>
 
     <!-- JavaScript for Modal & 3D Tilt Effect -->
     <script>
