@@ -1,985 +1,785 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Realistic Carrom Board</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ELUMINA — Created by DEVIL</title>
+<meta name="description" content="ELUMINA — Create your account for ₹500, share your ID and earn ₹250 per user. Created by DEVIL." />
 
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background: radial-gradient(circle at center, #1b2838 0%, #0d121d 100%);
-            touch-action: none;
-            user-select: none;
-            -webkit-user-select: none;
-            overflow: hidden;
-        }
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
 
-        .font-cinzel {
-            font-family: 'Cinzel', serif;
-        }
+<style>
+/* ================= RESET ================= */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+:root{
+  --bg:#050510;
+  --purple:#8b5cf6;
+  --violet:#a78bfa;
+  --cyan:#22d3ee;
+  --pink:#f472b6;
+  --text:#e8e8f0;
+  --muted:#9aa0ae;
+  --glass:rgba(255,255,255,.035);
+  --stroke:rgba(255,255,255,.09);
+}
+body{
+  font-family:'Space Grotesk',system-ui,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  overflow-x:hidden;
+  min-height:100vh;
+  cursor:none;
+  -webkit-font-smoothing:antialiased;
+}
+img{display:block;max-width:100%}
+a{text-decoration:none;color:inherit}
+::selection{background:var(--purple);color:#fff}
 
-        /* Glassmorphism styling */
-        .glass-panel {
-            background: rgba(22, 32, 50, 0.75);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 215, 0, 0.15);
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-        }
+/* ================= CURSOR ================= */
+.cur-dot,.cur-ring{
+  position:fixed;top:0;left:0;border-radius:50%;
+  pointer-events:none;z-index:9999;transform:translate(-50%,-50%);
+  mix-blend-mode:screen;
+}
+.cur-dot{width:7px;height:7px;background:var(--violet);box-shadow:0 0 12px var(--purple),0 0 26px var(--purple)}
+.cur-ring{
+  width:36px;height:36px;border:1.5px solid rgba(167,139,250,.55);
+  transition:width .25s,height .25s,border-color .25s,background .25s;
+}
+.cur-ring.hover{
+  width:64px;height:64px;border-color:var(--cyan);
+  background:rgba(34,211,238,.07);
+  box-shadow:0 0 26px rgba(34,211,238,.35);
+}
+@media (hover:none),(max-width:820px){
+  body{cursor:auto}
+  .cur-dot,.cur-ring{display:none}
+}
 
-        /* Responsive board container maintaining square aspect ratio */
-        .board-container {
-            width: min(88vw, 82vh);
-            height: min(88vw, 82vh);
-            max-width: 680px;
-            max-height: 680px;
-        }
+/* ================= BACKGROUND ================= */
+.bg{position:fixed;inset:0;z-index:-3;overflow:hidden;background:
+  radial-gradient(ellipse 80% 55% at 50% -15%,rgba(139,92,246,.35),transparent 60%),
+  radial-gradient(ellipse 60% 50% at 95% 90%,rgba(34,211,238,.16),transparent 60%),
+  radial-gradient(ellipse 65% 55% at -5% 75%,rgba(244,114,182,.14),transparent 60%),
+  #050510;}
+.blob{position:absolute;border-radius:50%;filter:blur(90px);opacity:.5;animation:float 24s ease-in-out infinite}
+.b1{width:520px;height:520px;background:#7c3aed;top:-12%;left:-10%}
+.b2{width:460px;height:460px;background:#06b6d4;bottom:-18%;right:-8%;animation-delay:-8s}
+.b3{width:380px;height:380px;background:#ec4899;top:45%;left:52%;animation-delay:-16s}
+@keyframes float{
+  0%,100%{transform:translate(0,0) scale(1)}
+  33%{transform:translate(70px,-60px) scale(1.12)}
+  66%{transform:translate(-60px,65px) scale(.94)}
+}
+.grid{
+  position:fixed;inset:0;z-index:-2;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(139,92,246,.07) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(139,92,246,.07) 1px,transparent 1px);
+  background-size:64px 64px;
+  -webkit-mask-image:radial-gradient(ellipse 85% 80% at 50% 40%,#000 15%,transparent 78%);
+  mask-image:radial-gradient(ellipse 85% 80% at 50% 40%,#000 15%,transparent 78%);
+}
+.noise{
+  position:fixed;inset:0;z-index:9998;pointer-events:none;opacity:.028;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
 
-        canvas {
-            width: 100%;
-            height: 100%;
-            display: block;
-            border-radius: 12px;
-            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8), 0 10px 30px rgba(0, 0, 0, 0.6);
-        }
+/* ================= NAV ================= */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  padding:18px 6vw;display:flex;align-items:center;justify-content:space-between;
+  transition:padding .4s,background .4s,backdrop-filter .4s,border-color .4s;
+  border-bottom:1px solid transparent;
+}
+nav.scrolled{
+  padding:12px 6vw;background:rgba(5,5,16,.72);
+  -webkit-backdrop-filter:blur(22px);backdrop-filter:blur(22px);
+  border-bottom:1px solid rgba(139,92,246,.18);
+}
+.brand{display:flex;align-items:center;gap:12px}
+.brand img{
+  width:42px;height:42px;border-radius:13px;object-fit:cover;
+  border:1px solid rgba(167,139,250,.45);
+  box-shadow:0 0 22px rgba(139,92,246,.55);
+  background:#12101f;
+}
+.brand .name{
+  font-family:'Syne',sans-serif;font-weight:800;font-size:1.15rem;letter-spacing:.22em;
+  background:linear-gradient(110deg,var(--violet),var(--cyan),var(--pink));
+  background-size:220% 220%;-webkit-background-clip:text;background-clip:text;color:transparent;
+  animation:shift 6s ease infinite;
+}
+@keyframes shift{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
 
-        /* Custom range slider styling */
-        input[type=range] {
-            -webkit-appearance: none;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            height: 8px;
-        }
+.links{display:flex;align-items:center;gap:32px}
+.links a{
+  font-size:.86rem;letter-spacing:.06em;color:#b6b8c6;position:relative;transition:color .3s;font-weight:500;
+}
+.links a::after{
+  content:'';position:absolute;left:0;bottom:-6px;height:2px;width:0;border-radius:2px;
+  background:linear-gradient(90deg,var(--violet),var(--cyan));transition:width .35s cubic-bezier(.4,0,.2,1);
+}
+.links a:hover{color:#fff}
+.links a:hover::after{width:100%}
 
-        input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            height: 22px;
-            width: 22px;
-            border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, #fef08a, #ca8a04);
-            cursor: pointer;
-            box-shadow: 0 0 10px rgba(234, 179, 8, 0.5);
-        }
-    </style>
+.nav-login{
+  padding:11px 26px;border-radius:100px;font-size:.8rem;font-weight:700;
+  letter-spacing:.12em;text-transform:uppercase;
+  background:linear-gradient(120deg,var(--purple),var(--cyan));color:#fff;
+  box-shadow:0 8px 30px rgba(139,92,246,.45);transition:transform .3s,box-shadow .3s;
+}
+.nav-login:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(34,211,238,.55)}
+
+.burger{display:none;flex-direction:column;gap:5px;background:none;border:0;padding:8px;cursor:pointer}
+.burger span{width:24px;height:2px;background:#c4b5fd;border-radius:2px;transition:.3s}
+
+@media(max-width:900px){
+  .links{
+    position:fixed;top:0;right:0;height:100vh;width:min(78vw,320px);
+    flex-direction:column;justify-content:center;gap:34px;
+    background:rgba(8,6,20,.96);-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);
+    border-left:1px solid rgba(139,92,246,.2);
+    transform:translateX(105%);transition:transform .45s cubic-bezier(.16,1,.3,1);
+    z-index:120;
+  }
+  .links.open{transform:translateX(0)}
+  .links a{font-size:1.05rem}
+  .burger{display:flex;z-index:130}
+  .burger.x span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+  .burger.x span:nth-child(2){opacity:0}
+  .burger.x span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+}
+
+/* ================= HERO ================= */
+.hero{
+  min-height:100vh;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;
+  padding:130px 6vw 90px;position:relative;
+}
+.badge{
+  display:inline-flex;align-items:center;gap:9px;
+  padding:9px 20px;border-radius:100px;margin-bottom:34px;
+  background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.32);
+  font-size:.72rem;letter-spacing:.24em;text-transform:uppercase;color:#c4b5fd;
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+  animation:up 1s ease .15s both;
+}
+.badge i{width:7px;height:7px;border-radius:50%;background:var(--cyan);box-shadow:0 0 12px var(--cyan);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.45;transform:scale(.75)}}
+
+.hero-logo{
+  width:118px;height:118px;border-radius:32px;object-fit:cover;
+  border:1px solid rgba(167,139,250,.5);
+  box-shadow:0 0 70px rgba(139,92,246,.65),0 0 140px rgba(34,211,238,.28);
+  margin-bottom:34px;background:#12101f;
+  animation:up 1s ease .25s both, breathe 6s ease-in-out infinite 1s;
+}
+@keyframes breathe{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-10px) scale(1.03)}}
+
+h1.title{
+  font-family:'Syne',sans-serif;
+  font-size:clamp(3.2rem,12vw,9.5rem);
+  font-weight:800;line-height:.92;letter-spacing:-.04em;position:relative;
+  background:linear-gradient(180deg,#fff 18%,var(--violet) 62%,var(--cyan) 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 0 70px rgba(139,92,246,.45));
+  animation:up 1.1s ease .35s both;
+}
+.title .glow{
+  position:absolute;inset:0;z-index:-1;color:transparent;
+  background:linear-gradient(90deg,var(--violet),var(--cyan),var(--pink));
+  background-size:200% 200%;
+  -webkit-background-clip:text;background-clip:text;
+  filter:blur(34px);opacity:.65;animation:shift 8s ease infinite;
+}
+.tagline{
+  margin-top:26px;max-width:660px;line-height:1.75;font-weight:300;
+  font-size:clamp(.98rem,2vw,1.18rem);color:var(--muted);
+  animation:up 1s ease .55s both;
+}
+.tagline b{color:#fff;font-weight:600}
+.creator{
+  margin-top:16px;font-size:.78rem;letter-spacing:.42em;text-transform:uppercase;
+  color:#6f7484;animation:up 1s ease .68s both;
+}
+.creator span{color:var(--pink);font-weight:700;text-shadow:0 0 22px rgba(244,114,182,.7)}
+
+/* hero offer strip */
+.offer{
+  margin-top:52px;display:grid;gap:14px;width:100%;max-width:900px;
+  grid-template-columns:repeat(3,1fr);animation:up 1s ease .8s both;
+}
+.offer .cell{
+  padding:20px 16px;border-radius:20px;
+  background:var(--glass);border:1px solid var(--stroke);
+  -webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);
+  transition:transform .4s,border-color .4s,box-shadow .4s;
+}
+.offer .cell:hover{
+  transform:translateY(-6px);border-color:rgba(139,92,246,.45);
+  box-shadow:0 18px 50px rgba(139,92,246,.22);
+}
+.offer .k{
+  font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:700;
+  background:linear-gradient(120deg,var(--violet),var(--cyan));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.offer .v{font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:#8b90a0;margin-top:8px}
+
+.cta{margin-top:44px;display:flex;gap:16px;flex-wrap:wrap;justify-content:center;animation:up 1s ease .95s both}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:10px;
+  padding:16px 38px;border-radius:100px;border:none;cursor:none;
+  font-family:'Space Grotesk',sans-serif;font-size:.84rem;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;
+  transition:transform .32s cubic-bezier(.4,0,.2,1),box-shadow .32s,border-color .32s;
+}
+.btn-primary{
+  background:linear-gradient(120deg,var(--purple),var(--cyan));color:#fff;
+  box-shadow:0 10px 44px rgba(139,92,246,.45);
+}
+.btn-primary:hover{transform:translateY(-3px) scale(1.03);box-shadow:0 16px 56px rgba(34,211,238,.5)}
+.btn-ghost{
+  background:rgba(255,255,255,.04);color:var(--text);
+  border:1px solid rgba(255,255,255,.16);
+  -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+}
+.btn-ghost:hover{transform:translateY(-3px);border-color:rgba(139,92,246,.6);box-shadow:0 14px 44px rgba(139,92,246,.25)}
+
+.scroll-hint{
+  position:absolute;bottom:28px;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+  font-size:.62rem;letter-spacing:.34em;text-transform:uppercase;color:#5f6474;
+  animation:up 1s ease 1.25s both;
+}
+.scroll-hint .ln{width:1px;height:46px;background:linear-gradient(180deg,var(--purple),transparent);animation:ln 2.2s ease-in-out infinite}
+@keyframes ln{0%,100%{transform:scaleY(.3);transform-origin:top;opacity:.35}50%{transform:scaleY(1);transform-origin:top;opacity:1}}
+
+@keyframes up{from{opacity:0;transform:translateY(42px)}to{opacity:1;transform:translateY(0)}}
+
+/* ================= SECTIONS ================= */
+section{padding:110px 6vw;position:relative}
+.head{text-align:center;margin-bottom:70px}
+.tag{font-size:.7rem;letter-spacing:.38em;text-transform:uppercase;color:var(--purple);font-weight:700;margin-bottom:16px}
+h2.st{
+  font-family:'Syne',sans-serif;font-weight:700;letter-spacing:-.02em;line-height:1.12;
+  font-size:clamp(2rem,5vw,3.4rem);
+  background:linear-gradient(180deg,#fff 32%,var(--violet) 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.sd{margin-top:18px;max-width:580px;margin-inline:auto;color:var(--muted);line-height:1.75;font-weight:300}
+
+.reveal{opacity:0;transform:translateY(46px);transition:opacity .9s cubic-bezier(.16,1,.3,1),transform .9s cubic-bezier(.16,1,.3,1)}
+.reveal.in{opacity:1;transform:none}
+
+/* ================= STEPS ================= */
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:24px;max-width:1150px;margin:0 auto}
+.step{
+  position:relative;padding:38px 30px;border-radius:24px;
+  background:var(--glass);border:1px solid var(--stroke);
+  -webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);
+  overflow:hidden;transition:transform .5s cubic-bezier(.16,1,.3,1),border-color .4s,box-shadow .4s;
+}
+.step::before{
+  content:'';position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .4s;
+  background:radial-gradient(520px circle at var(--mx,50%) var(--my,50%),rgba(139,92,246,.16),transparent 42%);
+}
+.step:hover::before{opacity:1}
+.step:hover{transform:translateY(-8px);border-color:rgba(139,92,246,.45);box-shadow:0 22px 60px rgba(139,92,246,.22)}
+.step .num{
+  font-family:'Syne',sans-serif;font-size:.72rem;letter-spacing:.3em;color:var(--cyan);
+  margin-bottom:22px;font-weight:700;
+}
+.step .ico{
+  width:54px;height:54px;border-radius:16px;display:grid;place-items:center;font-size:1.5rem;
+  background:linear-gradient(135deg,rgba(139,92,246,.22),rgba(34,211,238,.18));
+  border:1px solid rgba(139,92,246,.32);margin-bottom:22px;transition:transform .4s;
+}
+.step:hover .ico{transform:scale(1.1) rotate(-6deg)}
+.step h3{font-family:'Syne',sans-serif;font-size:1.22rem;font-weight:600;margin-bottom:12px}
+.step p{color:var(--muted);font-size:.94rem;line-height:1.7;font-weight:300}
+.step .amt{
+  display:inline-block;margin-top:18px;padding:7px 16px;border-radius:100px;
+  font-size:.74rem;font-weight:700;letter-spacing:.1em;
+  background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.35);color:#67e8f9;
+}
+
+/* ================= EARN CALC ================= */
+.calc-wrap{
+  max-width:1050px;margin:0 auto;display:grid;grid-template-columns:1.05fr .95fr;gap:26px;
+  align-items:stretch;
+}
+@media(max-width:880px){.calc-wrap{grid-template-columns:1fr}}
+.panel{
+  padding:42px 36px;border-radius:26px;
+  background:linear-gradient(150deg,rgba(139,92,246,.1),rgba(34,211,238,.05));
+  border:1px solid rgba(139,92,246,.24);
+  -webkit-backdrop-filter:blur(22px);backdrop-filter:blur(22px);
+  position:relative;overflow:hidden;
+}
+.panel h3{font-family:'Syne',sans-serif;font-size:1.45rem;margin-bottom:10px}
+.panel .hint{color:var(--muted);font-size:.9rem;font-weight:300;line-height:1.6}
+.range-row{margin-top:34px}
+.range-row label{
+  display:flex;justify-content:space-between;align-items:baseline;
+  font-size:.74rem;letter-spacing:.2em;text-transform:uppercase;color:#8b90a0;margin-bottom:16px;
+}
+.range-row output{
+  font-family:'Syne',sans-serif;font-size:1.35rem;font-weight:700;
+  background:linear-gradient(120deg,var(--violet),var(--cyan));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+input[type=range]{
+  -webkit-appearance:none;appearance:none;width:100%;height:8px;border-radius:100px;
+  background:linear-gradient(90deg,var(--purple),var(--cyan));outline:none;cursor:none;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;width:24px;height:24px;border-radius:50%;
+  background:#fff;border:3px solid var(--cyan);
+  box-shadow:0 0 20px rgba(34,211,238,.8);cursor:none;transition:transform .2s;
+}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.15)}
+input[type=range]::-moz-range-thumb{
+  width:22px;height:22px;border-radius:50%;background:#fff;border:3px solid var(--cyan);
+  box-shadow:0 0 20px rgba(34,211,238,.8);cursor:none;
+}
+.earning-box{
+  margin-top:30px;padding:26px;border-radius:20px;
+  background:rgba(0,0,0,.32);border:1px solid rgba(255,255,255,.08);
+}
+.earning-box .lbl{font-size:.7rem;letter-spacing:.26em;text-transform:uppercase;color:#7d8291}
+.earning-box .big{
+  font-family:'Syne',sans-serif;font-size:clamp(2.1rem,5vw,3.1rem);font-weight:800;line-height:1.1;margin-top:10px;
+  background:linear-gradient(120deg,#fff,var(--cyan));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 0 30px rgba(34,211,238,.35));
+}
+.earning-box .sub{font-size:.82rem;color:#8b90a0;margin-top:10px}
+
+/* price card */
+.price{
+  padding:44px 38px;border-radius:26px;text-align:center;position:relative;overflow:hidden;
+  background:linear-gradient(160deg,rgba(244,114,182,.1),rgba(139,92,246,.12));
+  border:1px solid rgba(244,114,182,.28);
+  -webkit-backdrop-filter:blur(22px);backdrop-filter:blur(22px);
+  display:flex;flex-direction:column;justify-content:center;
+}
+.price::after{
+  content:'';position:absolute;top:-60%;left:-30%;width:160%;height:220%;
+  background:conic-gradient(from 0deg,transparent,rgba(244,114,182,.14),transparent 32%);
+  animation:spin 14s linear infinite;pointer-events:none;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.price-inner{position:relative;z-index:1}
+.price .lbl{font-size:.7rem;letter-spacing:.3em;text-transform:uppercase;color:#f9a8d4}
+.price .amt{
+  font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(3rem,8vw,4.4rem);
+  line-height:1;margin:16px 0 6px;
+  background:linear-gradient(120deg,#fff,var(--pink));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 0 40px rgba(244,114,182,.45));
+}
+.price .once{font-size:.78rem;letter-spacing:.2em;text-transform:uppercase;color:#8b90a0}
+.price ul{list-style:none;margin:26px 0 30px;display:grid;gap:12px;text-align:left}
+.price li{display:flex;gap:11px;font-size:.9rem;color:#c9cbd6;font-weight:300;line-height:1.5}
+.price li i{color:var(--cyan);font-style:normal;font-weight:700}
+
+/* ================= SIGNUP ================= */
+.signup-shell{max-width:960px;margin:0 auto}
+.form-card{
+  padding:48px 42px;border-radius:28px;
+  background:var(--glass);border:1px solid var(--stroke);
+  -webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);
+  box-shadow:0 30px 90px rgba(0,0,0,.55);
+}
+@media(max-width:600px){.form-card{padding:32px 22px}}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:620px){.fgrid{grid-template-columns:1fr}}
+.field{display:flex;flex-direction:column;gap:9px}
+.field.full{grid-column:1/-1}
+.field label{font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:#8b90a0;font-weight:600}
+.field input,.field select{
+  padding:15px 18px;border-radius:14px;font-family:inherit;font-size:.94rem;color:#fff;
+  background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.11);
+  outline:none;transition:border-color .3s,box-shadow .3s,background .3s;cursor:none;
+}
+.field input::placeholder{color:#5c6170}
+.field input:focus,.field select:focus{
+  border-color:rgba(139,92,246,.7);background:rgba(139,92,246,.07);
+  box-shadow:0 0 0 4px rgba(139,92,246,.14);
+}
+.field select option{background:#0b0a18;color:#fff}
+.form-note{
+  margin-top:20px;font-size:.78rem;color:#767b8a;line-height:1.7;text-align:center;
+}
+.form-note b{color:var(--violet)}
+.submit-row{margin-top:28px;display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+.submit-row .btn{flex:1;min-width:220px}
+
+/* ID result card */
+.id-card{
+  display:none;margin-top:34px;padding:32px 26px;border-radius:22px;text-align:center;
+  background:linear-gradient(150deg,rgba(34,211,238,.1),rgba(139,92,246,.12));
+  border:1px dashed rgba(34,211,238,.45);
+  animation:up .7s cubic-bezier(.16,1,.3,1) both;
+}
+.id-card.show{display:block}
+.id-card .lbl{font-size:.68rem;letter-spacing:.3em;text-transform:uppercase;color:#67e8f9;margin-bottom:14px}
+.id-card .code{
+  font-family:'Syne',sans-serif;font-size:clamp(1.5rem,5vw,2.2rem);font-weight:800;letter-spacing:.14em;
+  background:linear-gradient(120deg,#fff,var(--cyan));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  word-break:break-all;
+}
+.id-card .msg{margin-top:14px;font-size:.84rem;color:var(--muted);line-height:1.7}
+.copy-btn{
+  margin-top:20px;padding:12px 30px;border-radius:100px;font-family:inherit;
+  font-size:.74rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
+  background:rgba(34,211,238,.13);border:1px solid rgba(34,211,238,.45);
+  color:#a5f3fc;cursor:none;transition:.3s;
+}
+.copy-btn:hover{background:rgba(34,211,238,.25);box-shadow:0 0 28px rgba(34,211,238,.35)}
+
+/* ================= FAQ ================= */
+.faq{max-width:820px;margin:0 auto;display:grid;gap:14px}
+details{
+  border-radius:18px;background:var(--glass);border:1px solid var(--stroke);
+  -webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);
+  padding:20px 26px;transition:border-color .3s,box-shadow .3s;
+}
+details[open]{border-color:rgba(139,92,246,.45);box-shadow:0 16px 50px rgba(139,92,246,.18)}
+summary{
+  list-style:none;cursor:none;display:flex;justify-content:space-between;align-items:center;gap:16px;
+  font-weight:600;font-size:.98rem;color:#e4e5ee;
+}
+summary::-webkit-details-marker{display:none}
+summary::after{
+  content:'+';font-family:'Syne',sans-serif;font-size:1.4rem;color:var(--violet);
+  transition:transform .3s;line-height:1;
+}
+details[open] summary::after{transform:rotate(45deg);color:var(--cyan)}
+details p{margin-top:14px;color:var(--muted);font-size:.9rem;line-height:1.8;font-weight:300}
+
+/* ================= FINAL CTA ================= */
+.final{
+  max-width:1050px;margin:0 auto;padding:70px 40px;border-radius:32px;text-align:center;
+  position:relative;overflow:hidden;
+  background:linear-gradient(150deg,rgba(139,92,246,.14),rgba(34,211,238,.07));
+  border:1px solid rgba(139,92,246,.3);
+  -webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);
+}
+.final::before{
+  content:'';position:absolute;top:-70%;left:-25%;width:150%;height:240%;
+  background:conic-gradient(from 0deg,transparent,rgba(139,92,246,.18),transparent 30%);
+  animation:spin 16s linear infinite;pointer-events:none;
+}
+.final > *{position:relative;z-index:1}
+.final h2{
+  font-family:'Syne',sans-serif;font-size:clamp(1.8rem,4.4vw,2.9rem);font-weight:700;line-height:1.15;
+  background:linear-gradient(180deg,#fff,#c4b5fd);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.final p{margin-top:18px;color:var(--muted);font-weight:300;line-height:1.8;max-width:560px;margin-inline:auto}
+.final .cta{margin-top:34px}
+
+/* ================= FOOTER ================= */
+footer{padding:70px 6vw 38px;border-top:1px solid rgba(139,92,246,.16);text-align:center}
+.f-brand{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:16px}
+.f-brand img{width:48px;height:48px;border-radius:14px;object-fit:cover;border:1px solid rgba(167,139,250,.45);box-shadow:0 0 26px rgba(139,92,246,.5)}
+.f-brand .n{
+  font-family:'Syne',sans-serif;font-weight:800;font-size:1.6rem;letter-spacing:.22em;
+  background:linear-gradient(110deg,var(--violet),var(--cyan),var(--pink));
+  background-size:220% 220%;-webkit-background-clip:text;background-clip:text;color:transparent;
+  animation:shift 6s ease infinite;
+}
+footer .made{font-size:.85rem;color:#6f7484;letter-spacing:.08em}
+footer .made span{color:var(--pink);font-weight:700;text-shadow:0 0 20px rgba(244,114,182,.6)}
+.f-links{display:flex;justify-content:center;gap:28px;flex-wrap:wrap;margin:28px 0}
+.f-links a{font-size:.82rem;color:#8b90a0;transition:color .3s}
+.f-links a:hover{color:var(--violet)}
+.copy{margin-top:26px;font-size:.72rem;color:#4b5060;letter-spacing:.16em}
+
+/* ================= TOAST ================= */
+.toast{
+  position:fixed;left:50%;bottom:36px;transform:translate(-50%,140%);
+  z-index:10000;padding:15px 30px;border-radius:100px;
+  background:rgba(12,10,26,.95);border:1px solid rgba(34,211,238,.45);
+  color:#a5f3fc;font-size:.84rem;letter-spacing:.06em;font-weight:500;
+  -webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);
+  box-shadow:0 18px 60px rgba(0,0,0,.6),0 0 40px rgba(34,211,238,.18);
+  transition:transform .5s cubic-bezier(.16,1,.3,1);white-space:nowrap;
+}
+.toast.show{transform:translate(-50%,0)}
+@media(max-width:520px){.toast{white-space:normal;width:calc(100% - 40px);text-align:center;border-radius:20px}}
+</style>
 </head>
-<body class="h-screen w-screen flex flex-col justify-between items-center p-2 sm:p-4 text-slate-100 overflow-hidden">
+<body>
 
-    <!-- Header Section -->
-    <header class="w-full max-w-4xl flex justify-between items-center px-4 py-2 glass-panel rounded-2xl z-10 my-1">
-        <div class="flex items-center space-x-3">
-            <div class="p-2 bg-amber-500/10 rounded-xl border border-amber-500/20 text-amber-400">
-                <i data-lucide="trophy" class="w-6 h-6"></i>
-            </div>
-            <div>
-                <h1 class="font-cinzel text-lg sm:text-2xl font-bold tracking-wider text-amber-300">REAL CARROM</h1>
-                <p class="text-xs text-slate-400 hidden sm:block">CREATED BY SAITH REHMAN ALI.</p>
-            </div>
-        </div>
+<!-- cursor -->
+<div class="cur-dot"></div>
+<div class="cur-ring"></div>
 
-        <div class="flex items-center space-x-2 sm:space-x-4">
-            <button id="audioToggle" class="p-2 sm:px-3 sm:py-2 bg-slate-800/80 hover:bg-slate-700 rounded-xl border border-slate-700 text-slate-300 flex items-center space-x-1 text-xs transition">
-                <i data-lucide="volume-2" id="soundIcon" class="w-4 h-4"></i>
-                <span class="hidden sm:inline">Sound</span>
-            </button>
+<!-- background -->
+<div class="bg">
+  <div class="blob b1"></div>
+  <div class="blob b2"></div>
+  <div class="blob b3"></div>
+</div>
+<div class="grid"></div>
+<div class="noise"></div>
 
-            <button id="restartBtn" class="p-2 sm:px-3 sm:py-2 bg-amber-600/80 hover:bg-amber-500 rounded-xl text-white font-medium flex items-center space-x-1 text-xs transition shadow-lg shadow-amber-900/30">
-                <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
-                <span class="hidden sm:inline">Reset Game</span>
-            </button>
-            
-            <button id="modeBtn" class="p-2 sm:px-3 sm:py-2 bg-indigo-600/80 hover:bg-indigo-500 rounded-xl text-white font-medium flex items-center space-x-1 text-xs transition shadow-lg shadow-indigo-900/30">
-                <i data-lucide="users" class="w-4 h-4"></i>
-                <span id="modeText" class="hidden sm:inline">vs AI</span>
-            </button>
-        </div>
-    </header>
+<!-- ================= NAV ================= -->
+<nav id="nav">
+  <a href="#" class="brand">
+    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcST0nI7u8NHDNezXxIimeRekeRxPW5KBewhxYFLe-Lbdg&s=10"
+         alt="ELUMINA logo" referrerpolicy="no-referrer"
+         onerror="this.style.display='none'">
+    <span class="name">ELUMINA</span>
+  </a>
 
-    <!-- Main Game Workspace -->
-    <main class="w-full flex-1 flex flex-col items-center justify-center relative">
-        <!-- Scoreboard Bar -->
-        <div class="w-full max-w-xl flex justify-between items-center px-4 py-2 my-1 glass-panel rounded-xl text-xs sm:text-sm">
-            <!-- Player 1 Info -->
-            <div id="p1Card" class="flex items-center space-x-2 p-1.5 px-3 rounded-lg border border-amber-500/40 bg-amber-500/10 transition-all">
-                <div class="w-3 h-3 rounded-full bg-amber-400"></div>
-                <div>
-                    <span class="font-semibold text-slate-200">Player 1</span>
-                    <span id="p1Score" class="ml-2 font-bold text-amber-300 text-sm">0 pts</span>
-                </div>
-            </div>
+  <div class="links" id="links">
+    <a href="1.html">How It Works</a>
+    <a href="1.html">Earnings</a>
+    <a href="1.html">Create Account</a>
+    <a href="1.html">FAQ</a>
+    <a href="1.html" class="nav-login">Login</a>
+  </div>
 
-            <!-- Queen Status Indicator -->
-            <div class="flex flex-col items-center">
-                <span class="text-[10px] text-slate-400 uppercase tracking-widest">Queen</span>
-                <div id="queenStatus" class="flex items-center space-x-1 text-rose-400 font-medium text-xs">
-                    <span class="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block animate-pulse"></span>
-                    <span>In Play</span>
-                </div>
-            </div>
+  <button class="burger" id="burger" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
 
-            <!-- Player 2 / AI Info -->
-            <div id="p2Card" class="flex items-center space-x-2 p-1.5 px-3 rounded-lg border border-transparent transition-all">
-                <div class="w-3 h-3 rounded-full bg-slate-400"></div>
-                <div>
-                    <span id="p2Name" class="font-semibold text-slate-200">AI Bot</span>
-                    <span id="p2Score" class="ml-2 font-bold text-amber-300 text-sm">0 pts</span>
-                </div>
-            </div>
-        </div>
+<!-- ================= HERO ================= -->
+<header class="hero">
+  <div class="badge"><i></i> Official ELUMINA Network</div>
 
-        <!-- Canvas Game Board -->
-        <div class="board-container relative my-auto">
-            <canvas id="carromCanvas"></canvas>
+  <img class="hero-logo"
+       src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcST0nI7u8NHDNezXxIimeRekeRxPW5KBewhxYFLe-Lbdg&s=10"
+       alt="ELUMINA" referrerpolicy="no-referrer">
 
-            <!-- Turn Banner Overlay (Shown briefly when turns switch) -->
-            <div id="turnBanner" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black/80 border border-amber-500/50 backdrop-blur-md px-6 py-2.5 rounded-2xl pointer-events-none opacity-0 transition-opacity duration-300 flex items-center space-x-2 shadow-2xl">
-                <i data-lucide="zap" class="w-5 h-5 text-amber-400"></i>
-                <span id="turnText" class="font-cinzel text-sm sm:text-lg text-amber-200 font-bold tracking-wide">Player 1's Turn</span>
-            </div>
-        </div>
+  <h1 class="title">
+    ELUMINA
+    <span class="glow" aria-hidden="true">ELUMINA</span>
+  </h1>
 
-        <!-- Striker Positioning Control Bar -->
-        <div class="w-full max-w-md glass-panel p-3 rounded-2xl my-1 flex flex-col items-center space-y-2">
-            <div class="flex justify-between w-full px-2 text-xs text-slate-300 font-medium">
-                <span class="flex items-center gap-1"><i data-lucide="move-horizontal" class="w-3.5 h-3.5 text-amber-400"></i> Position Striker</span>
-                <span id="dragHint" class="text-amber-300/80">Pull back striker to aim & shoot</span>
-            </div>
-            <input type="range" id="strikerSlider" min="0" max="100" value="50" class="w-full cursor-pointer">
-        </div>
-    </main>
+  <p class="tagline">
+    Create your account for just <b>₹500</b>, share your unique <b>ID</b>,
+    and earn <b>₹250 for every user</b> who joins through you.
+    Welcome to the network built for the bold.
+  </p>
 
-    <!-- Pocketed Pieces Tray -->
-    <footer class="w-full max-w-xl glass-panel py-2 px-4 rounded-xl flex items-center justify-between text-xs z-10">
-        <span class="text-slate-400 font-medium">Pocketed:</span>
-        <div id="pocketedTray" class="flex items-center space-x-1.5 overflow-x-auto py-1">
-            <!-- Dynamic pocketed pieces will be placed here -->
-            <span class="text-slate-500 italic text-[11px]">None</span>
-        </div>
-    </footer>
+  <p class="creator">Created by <span>DEVIL</span></p>
 
-    <!-- Game Over Modal -->
-    <div id="gameOverModal" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 hidden">
-        <div class="glass-panel p-6 sm:p-8 rounded-3xl max-w-sm w-full mx-4 text-center border border-amber-500/30 shadow-2xl flex flex-col items-center">
-            <div class="w-16 h-16 bg-amber-500/20 rounded-full flex items-center justify-center text-amber-400 mb-4 border border-amber-500/40">
-                <i data-lucide="award" class="w-8 h-8"></i>
-            </div>
-            <h2 id="winnerText" class="font-cinzel text-2xl font-bold text-amber-300 mb-1">PLAYER 1 WINS!</h2>
-            <p id="winnerScore" class="text-sm text-slate-300 mb-6">Final Score: 450 pts</p>
-            <button id="modalPlayAgain" class="w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold rounded-xl shadow-lg shadow-amber-500/20 transition transform active:scale-95">
-                Play Again
-            </button>
-        </div>
+  <div class="offer">
+    <div class="cell">
+      <div class="k">₹500</div>
+      <div class="v">Create Account</div>
     </div>
-
-    <!-- CARROM GAME LOGIC & ENGINE -->
-    <script>
-        // --- LUCIDE ICONS INIT ---
-        lucide.createIcons();
-
-        // --- AUDIO SYNTHESIS ENGINE (Web Audio API) ---
-        class SoundFX {
-            constructor() {
-                this.ctx = null;
-                this.muted = false;
-            }
-
-            init() {
-                if (!this.ctx) {
-                    const AudioContext = window.AudioContext || window.webkitAudioContext;
-                    this.ctx = new AudioContext();
-                }
-            }
-
-            playHit(volume = 1) {
-                if (this.muted) return;
-                this.init();
-                if (!this.ctx) return;
-
-                const osc = this.ctx.createOscillator();
-                const gain = this.ctx.createGain();
-                osc.type = 'triangle';
-                osc.frequency.setValueAtTime(120 + Math.random() * 60, this.ctx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(30, this.ctx.currentTime + 0.08);
-
-                gain.gain.setValueAtTime(Math.min(volume, 1) * 0.8, this.ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.08);
-
-                osc.connect(gain);
-                gain.connect(this.ctx.destination);
-                osc.start();
-                osc.stop(this.ctx.currentTime + 0.08);
-            }
-
-            playPocket() {
-                if (this.muted) return;
-                this.init();
-                if (!this.ctx) return;
-
-                const osc = this.ctx.createOscillator();
-                const gain = this.ctx.createGain();
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(300, this.ctx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(100, this.ctx.currentTime + 0.2);
-
-                gain.gain.setValueAtTime(0.5, this.ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.2);
-
-                osc.connect(gain);
-                gain.connect(this.ctx.destination);
-                osc.start();
-                osc.stop(this.ctx.currentTime + 0.2);
-            }
-
-            playFoul() {
-                if (this.muted) return;
-                this.init();
-                if (!this.ctx) return;
-
-                const osc = this.ctx.createOscillator();
-                const gain = this.ctx.createGain();
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(180, this.ctx.currentTime);
-                osc.frequency.setValueAtTime(110, this.ctx.currentTime + 0.1);
-
-                gain.gain.setValueAtTime(0.4, this.ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.25);
-
-                osc.connect(gain);
-                gain.connect(this.ctx.destination);
-                osc.start();
-                osc.stop(this.ctx.currentTime + 0.25);
-            }
-        }
-
-        const audio = new SoundFX();
-
-        // --- GAME CONSTANTS & CONFIGURATION ---
-        const CANVAS_SIZE = 800; // Native canvas resolution
-        const FRAME_MARGIN = 64;  // Wooden border width
-        const BOARD_INNER = CANVAS_SIZE - FRAME_MARGIN * 2;
-        const POCKET_RADIUS = 32;
-        const BASELINE_OFFSET = 110;
-
-        const PIECE_TYPES = {
-            WHITE: { color: '#fef3c7', edge: '#d97706', pts: 100, radius: 16, mass: 1 },
-            BLACK: { color: '#1e293b', edge: '#475569', pts: 50, radius: 16, mass: 1 },
-            QUEEN: { color: '#e11d48', edge: '#fb7185', pts: 300, radius: 16, mass: 1 },
-            STRIKER: { color: '#38bdf8', edge: '#0284c7', pts: 0, radius: 21, mass: 1.8 }
-        };
-
-        const FRICTION = 0.982;
-        const BOUNCE_RESTITUTION = 0.82;
-
-        // --- GAME STATE ---
-        let canvas, ctx;
-        let pieces = [];
-        let striker = null;
-        let isVsAI = true;
-        let currentPlayer = 1; // 1 or 2
-        let scores = { 1: 0, 2: 0 };
-        let queenState = 'IN_PLAY'; // IN_PLAY, POCKETED_WAITING_COVER, COVERED
-        let queenPocketedBy = null;
-        let turnPocketedPieces = [];
-        let isAiming = false;
-        let aimStart = { x: 0, y: 0 };
-        let dragCurrent = { x: 0, y: 0 };
-        let isMoving = false;
-        let gameOver = false;
-
-        // --- PIECE CLASS ---
-        class Piece {
-            constructor(x, y, type) {
-                this.x = x;
-                this.y = y;
-                this.vx = 0;
-                this.vy = 0;
-                this.type = type;
-                this.radius = type.radius;
-                this.mass = type.mass;
-                this.isPocketed = false;
-            }
-
-            update() {
-                if (this.isPocketed) return;
-
-                this.x += this.vx;
-                this.y += this.vy;
-
-                // Friction
-                this.vx *= FRICTION;
-                this.vy *= FRICTION;
-
-                // Stop subtle drift
-                if (Math.abs(this.vx) < 0.04) this.vx = 0;
-                if (Math.abs(this.vy) < 0.04) this.vy = 0;
-
-                // Cushion Collision Handling
-                const minX = FRAME_MARGIN + this.radius;
-                const maxX = CANVAS_SIZE - FRAME_MARGIN - this.radius;
-                const minY = FRAME_MARGIN + this.radius;
-                const maxY = CANVAS_SIZE - FRAME_MARGIN - this.radius;
-
-                if (this.x < minX) { this.x = minX; this.vx *= -BOUNCE_RESTITUTION; audio.playHit(0.4); }
-                if (this.x > maxX) { this.x = maxX; this.vx *= -BOUNCE_RESTITUTION; audio.playHit(0.4); }
-                if (this.y < minY) { this.y = minY; this.vy *= -BOUNCE_RESTITUTION; audio.playHit(0.4); }
-                if (this.y > maxY) { this.y = maxY; this.vy *= -BOUNCE_RESTITUTION; audio.playHit(0.4); }
-            }
-
-            draw(ctx) {
-                if (this.isPocketed) return;
-
-                ctx.save();
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-
-                // Subtle shadow
-                ctx.shadowColor = 'rgba(0,0,0,0.4)';
-                ctx.shadowBlur = 8;
-                ctx.shadowOffsetY = 4;
-
-                // Piece Base Gradient
-                const grad = ctx.createRadialGradient(
-                    this.x - this.radius * 0.3, this.y - this.radius * 0.3, this.radius * 0.1,
-                    this.x, this.y, this.radius
-                );
-
-                if (this.type === PIECE_TYPES.WHITE) {
-                    grad.addColorStop(0, '#ffffff');
-                    grad.addColorStop(0.8, '#fef3c7');
-                    grad.addColorStop(1, '#d97706');
-                } else if (this.type === PIECE_TYPES.BLACK) {
-                    grad.addColorStop(0, '#475569');
-                    grad.addColorStop(0.8, '#1e293b');
-                    grad.addColorStop(1, '#0f172a');
-                } else if (this.type === PIECE_TYPES.QUEEN) {
-                    grad.addColorStop(0, '#f43f5e');
-                    grad.addColorStop(0.8, '#e11d48');
-                    grad.addColorStop(1, '#881337');
-                } else if (this.type === PIECE_TYPES.STRIKER) {
-                    grad.addColorStop(0, '#bae6fd');
-                    grad.addColorStop(0.7, '#38bdf8');
-                    grad.addColorStop(1, '#0369a1');
-                }
-
-                ctx.fillStyle = grad;
-                ctx.fill();
-
-                // Inner accent circle ring
-                ctx.shadowBlur = 0;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.radius * 0.55, 0, Math.PI * 2);
-                ctx.strokeStyle = this.type.edge;
-                ctx.lineWidth = 2;
-                ctx.stroke();
-
-                // Center Dot
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.radius * 0.2, 0, Math.PI * 2);
-                ctx.fillStyle = this.type.edge;
-                ctx.fill();
-
-                ctx.restore();
-            }
-        }
-
-        // --- POCKET SETUP ---
-        const pockets = [
-            { x: FRAME_MARGIN + 22, y: FRAME_MARGIN + 22 },
-            { x: CANVAS_SIZE - FRAME_MARGIN - 22, y: FRAME_MARGIN + 22 },
-            { x: FRAME_MARGIN + 22, y: CANVAS_SIZE - FRAME_MARGIN - 22 },
-            { x: CANVAS_SIZE - FRAME_MARGIN - 22, y: CANVAS_SIZE - FRAME_MARGIN - 22 }
-        ];
-
-        // --- INITIALIZATION ---
-        function initGame() {
-            canvas = document.getElementById('carromCanvas');
-            canvas.width = CANVAS_SIZE;
-            canvas.height = CANVAS_SIZE;
-            ctx = canvas.getContext('2d');
-
-            setupEvents();
-            resetBoard();
-            requestAnimationFrame(gameLoop);
-        }
-
-        function resetBoard() {
-            pieces = [];
-            scores = { 1: 0, 2: 0 };
-            queenState = 'IN_PLAY';
-            queenPocketedBy = null;
-            currentPlayer = 1;
-            gameOver = false;
-            document.getElementById('gameOverModal').classList.add('hidden');
-            updateUI();
-
-            // Center Rosette Setup (Traditional Arrangement)
-            const centerX = CANVAS_SIZE / 2;
-            const centerY = CANVAS_SIZE / 2;
-            const r = PIECE_TYPES.WHITE.radius;
-
-            // Queen in center
-            pieces.push(new Piece(centerX, centerY, PIECE_TYPES.QUEEN));
-
-            // Inner Ring: 6 pieces alternating Black & White
-            for (let i = 0; i < 6; i++) {
-                const angle = (i * Math.PI) / 3;
-                const x = centerX + Math.cos(angle) * (r * 2.05);
-                const y = centerY + Math.sin(angle) * (r * 2.05);
-                const type = (i % 2 === 0) ? PIECE_TYPES.WHITE : PIECE_TYPES.BLACK;
-                pieces.push(new Piece(x, y, type));
-            }
-
-            // Outer Ring: 12 pieces
-            for (let i = 0; i < 12; i++) {
-                const angle = (i * Math.PI) / 6 + (Math.PI / 12);
-                const x = centerX + Math.cos(angle) * (r * 4.05);
-                const y = centerY + Math.sin(angle) * (r * 4.05);
-                const type = (i % 2 === 0) ? PIECE_TYPES.BLACK : PIECE_TYPES.WHITE;
-                pieces.push(new Piece(x, y, type));
-            }
-
-            // Init Striker
-            striker = new Piece(centerX, CANVAS_SIZE - FRAME_MARGIN - BASELINE_OFFSET, PIECE_TYPES.STRIKER);
-            resetStrikerPosition();
-        }
-
-        function resetStrikerPosition() {
-            const sliderVal = document.getElementById('strikerSlider').value;
-            const minX = FRAME_MARGIN + 70;
-            const maxX = CANVAS_SIZE - FRAME_MARGIN - 70;
-            const xPos = minX + (sliderVal / 100) * (maxX - minX);
-
-            const yPos = (currentPlayer === 1) 
-                ? CANVAS_SIZE - FRAME_MARGIN - BASELINE_OFFSET 
-                : FRAME_MARGIN + BASELINE_OFFSET;
-
-            striker.x = xPos;
-            striker.y = yPos;
-            striker.vx = 0;
-            striker.vy = 0;
-            striker.isPocketed = false;
-        }
-
-        // --- DRAWING FUNCTIONS ---
-        function drawBoard() {
-            // 1. Outer Wooden Frame
-            ctx.fillStyle = '#2d1b0e';
-            ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
-
-            // Wood Grain Highlights/Border depth
-            ctx.lineWidth = 6;
-            ctx.strokeStyle = '#4a2e18';
-            ctx.strokeRect(FRAME_MARGIN / 2, FRAME_MARGIN / 2, CANVAS_SIZE - FRAME_MARGIN, CANVAS_SIZE - FRAME_MARGIN);
-
-            // 2. Inner Playing Surface (Varnished Wood)
-            const surfaceGrad = ctx.createRadialGradient(
-                CANVAS_SIZE/2, CANVAS_SIZE/2, 50,
-                CANVAS_SIZE/2, CANVAS_SIZE/2, CANVAS_SIZE/2
-            );
-            surfaceGrad.addColorStop(0, '#fef3c7');
-            surfaceGrad.addColorStop(1, '#fde68a');
-
-            ctx.fillStyle = surfaceGrad;
-            ctx.fillRect(FRAME_MARGIN, FRAME_MARGIN, BOARD_INNER, BOARD_INNER);
-
-            // Inner Frame Shadow
-            ctx.lineWidth = 12;
-            ctx.strokeStyle = 'rgba(0,0,0,0.15)';
-            ctx.strokeRect(FRAME_MARGIN + 6, FRAME_MARGIN + 6, BOARD_INNER - 12, BOARD_INNER - 12);
-
-            // 3. Four Corner Pockets
-            pockets.forEach(p => {
-                ctx.save();
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, POCKET_RADIUS, 0, Math.PI * 2);
-                ctx.fillStyle = '#0f172a';
-                ctx.fill();
-
-                // Pocket Inner Shadow Ring
-                ctx.lineWidth = 4;
-                ctx.strokeStyle = '#334155';
-                ctx.stroke();
-                ctx.restore();
-            });
-
-            // 4. Center Circle & Concentric Patterns
-            const cx = CANVAS_SIZE / 2;
-            const cy = CANVAS_SIZE / 2;
-
-            ctx.lineWidth = 2;
-            ctx.strokeStyle = '#b45309';
-
-            // Outer Center Ring
-            ctx.beginPath();
-            ctx.arc(cx, cy, 65, 0, Math.PI * 2);
-            ctx.stroke();
-
-            // Inner Red Queen Circle
-            ctx.beginPath();
-            ctx.arc(cx, cy, 18, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(225, 29, 72, 0.2)';
-            ctx.fill();
-            ctx.strokeStyle = '#e11d48';
-            ctx.stroke();
-
-            // 5. Baselines and Circles
-            drawBaselines();
-        }
-
-        function drawBaselines() {
-            ctx.lineWidth = 2;
-            ctx.strokeStyle = '#b45309';
-
-            const sides = [
-                { y: CANVAS_SIZE - FRAME_MARGIN - BASELINE_OFFSET, rot: 0 },
-                { y: FRAME_MARGIN + BASELINE_OFFSET, rot: Math.PI },
-                { x: FRAME_MARGIN + BASELINE_OFFSET, rot: -Math.PI / 2 },
-                { x: CANVAS_SIZE - FRAME_MARGIN - BASELINE_OFFSET, rot: Math.PI / 2 }
-            ];
-
-            const minOffset = FRAME_MARGIN + 70;
-            const maxOffset = CANVAS_SIZE - FRAME_MARGIN - 70;
-
-            // Draw Top and Bottom Baselines
-            [CANVAS_SIZE - FRAME_MARGIN - BASELINE_OFFSET, FRAME_MARGIN + BASELINE_OFFSET].forEach(y => {
-                ctx.beginPath();
-                ctx.moveTo(minOffset, y - 10);
-                ctx.lineTo(maxOffset, y - 10);
-                ctx.moveTo(minOffset, y + 10);
-                ctx.lineTo(maxOffset, y + 10);
-                ctx.stroke();
-
-                // Red Circle Ends
-                [minOffset, maxOffset].forEach(x => {
-                    ctx.beginPath();
-                    ctx.arc(x, y, 12, 0, Math.PI * 2);
-                    ctx.fillStyle = '#dc2626';
-                    ctx.fill();
-                    ctx.stroke();
-                });
-            });
-
-            // Draw Left and Right Baselines
-            [FRAME_MARGIN + BASELINE_OFFSET, CANVAS_SIZE - FRAME_MARGIN - BASELINE_OFFSET].forEach(x => {
-                ctx.beginPath();
-                ctx.moveTo(x - 10, minOffset);
-                ctx.lineTo(x - 10, maxOffset);
-                ctx.moveTo(x + 10, minOffset);
-                ctx.lineTo(x + 10, maxOffset);
-                ctx.stroke();
-
-                // Red Circle Ends
-                [minOffset, maxOffset].forEach(y => {
-                    ctx.beginPath();
-                    ctx.arc(x, y, 12, 0, Math.PI * 2);
-                    ctx.fillStyle = '#dc2626';
-                    ctx.fill();
-                    ctx.stroke();
-                });
-            });
-        }
-
-        function drawAimLine() {
-            if (!isAiming || isMoving) return;
-
-            const dx = aimStart.x - dragCurrent.x;
-            const dy = aimStart.y - dragCurrent.y;
-            const dist = Math.hypot(dx, dy);
-
-            if (dist < 10) return;
-
-            // Pullback trajectory prediction line
-            const power = Math.min(dist * 0.18, 28);
-            const angle = Math.atan2(dy, dx);
-
-            ctx.save();
-            ctx.setLineDash([8, 6]);
-            ctx.lineWidth = 3;
-            ctx.strokeStyle = 'rgba(251, 191, 36, 0.8)';
-
-            ctx.beginPath();
-            ctx.moveTo(striker.x, striker.y);
-            ctx.lineTo(striker.x + Math.cos(angle) * power * 12, striker.y + Math.sin(angle) * power * 12);
-            ctx.stroke();
-
-            // Elastic Slingshot Line
-            ctx.restore();
-            ctx.beginPath();
-            ctx.moveTo(striker.x, striker.y);
-            ctx.lineTo(dragCurrent.x, dragCurrent.y);
-            ctx.lineWidth = 4;
-            ctx.strokeStyle = 'rgba(239, 68, 68, 0.7)';
-            ctx.stroke();
-        }
-
-        // --- PHYSICS & COLLISION ENGINE ---
-        function updatePhysics() {
-            let activeMotion = false;
-
-            // Combine Striker + Pieces
-            const allPieces = [...pieces, striker];
-
-            allPieces.forEach(p => {
-                if (!p.isPocketed) {
-                    p.update();
-                    if (Math.hypot(p.vx, p.vy) > 0.05) activeMotion = true;
-                }
-            });
-
-            // Piece to Piece Collisions
-            for (let i = 0; i < allPieces.length; i++) {
-                for (let j = i + 1; j < allPieces.length; j++) {
-                    const p1 = allPieces[i];
-                    const p2 = allPieces[j];
-
-                    if (p1.isPocketed || p2.isPocketed) continue;
-
-                    const dx = p2.x - p1.x;
-                    const dy = p2.y - p1.y;
-                    const dist = Math.hypot(dx, dy);
-                    const minDist = p1.radius + p2.radius;
-
-                    if (dist < minDist) {
-                        // Collision Resolution (Elastic 2D)
-                        const overlap = minDist - dist;
-                        const nx = dx / (dist || 1);
-                        const ny = dy / (dist || 1);
-
-                        // Separate overlapping bodies
-                        p1.x -= nx * overlap * 0.5;
-                        p1.y -= ny * overlap * 0.5;
-                        p2.x += nx * overlap * 0.5;
-                        p2.y += ny * overlap * 0.5;
-
-                        // Relative velocity
-                        const kx = p1.vx - p2.vx;
-                        const ky = p1.vy - p2.vy;
-                        const p = 2 * (nx * kx + ny * ky) / (p1.mass + p2.mass);
-
-                        p1.vx -= p * p2.mass * nx;
-                        p1.vy -= p * p2.mass * ny;
-                        p2.vx += p * p1.mass * nx;
-                        p2.vy += p * p1.mass * ny;
-
-                        // Trigger Sound
-                        const impactVel = Math.hypot(kx, ky);
-                        if (impactVel > 0.5) {
-                            audio.playHit(impactVel / 15);
-                        }
-                    }
-                }
-            }
-
-            // Check Pocket Hits
-            allPieces.forEach(p => {
-                if (p.isPocketed) return;
-
-                pockets.forEach(pkt => {
-                    const dist = Math.hypot(p.x - pkt.x, p.y - pkt.y);
-                    if (dist < POCKET_RADIUS - 6) {
-                        p.isPocketed = true;
-                        p.vx = 0;
-                        p.vy = 0;
-                        audio.playPocket();
-
-                        if (p !== striker) {
-                            turnPocketedPieces.push(p);
-                        }
-                    }
-                });
-            });
-
-            // Handle Shot Completion
-            if (isMoving && !activeMotion) {
-                isMoving = false;
-                processTurnEnd();
-            }
-        }
-
-        // --- GAME LOGIC & TURN RULES ---
-        function processTurnEnd() {
-            let foul = false;
-
-            // Check Striker Foul
-            if (striker.isPocketed) {
-                foul = true;
-                scores[currentPlayer] = Math.max(0, scores[currentPlayer] - 50);
-                audio.playFoul();
-                showBanner("STRIKER FOUL! -50 pts");
-            }
-
-            // Process Pocketed Pieces
-            let earnedPoints = 0;
-            let extraTurn = false;
-
-            turnPocketedPieces.forEach(piece => {
-                if (piece.type === PIECE_TYPES.QUEEN) {
-                    queenState = 'POCKETED_WAITING_COVER';
-                    queenPocketedBy = currentPlayer;
-                    extraTurn = true;
-                    showBanner("QUEEN POCKETED! Cover required.");
-                } else {
-                    earnedPoints += piece.type.pts;
-                    extraTurn = true;
-                }
-            });
-
-            // Queen Cover Validation Logic
-            if (queenState === 'POCKETED_WAITING_COVER' && queenPocketedBy === currentPlayer) {
-                const coverPiece = turnPocketedPieces.find(p => p.type !== PIECE_TYPES.QUEEN);
-                if (coverPiece) {
-                    queenState = 'COVERED';
-                    earnedPoints += PIECE_TYPES.QUEEN.pts;
-                    showBanner("QUEEN COVERED! +300 pts");
-                } else if (turnPocketedPieces.length === 1 && turnPocketedPieces[0].type === PIECE_TYPES.QUEEN) {
-                    // Pocketed queen alone, need to cover on NEXT shot or re-spot
-                    // Turn continues for cover attempt
-                } else {
-                    // Failed cover on subsequent turn -> Respot Queen
-                    respotQueen();
-                }
-            }
-
-            scores[currentPlayer] += earnedPoints;
-
-            // Check Win Condition
-            const remainingCarromMen = pieces.filter(p => !p.isPocketed && p.type !== PIECE_TYPES.STRIKER);
-            if (remainingCarromMen.length === 0) {
-                endGame();
-                return;
-            }
-
-            // Switch Turns if no valid piece pocketed or foul occurred
-            if (!extraTurn || foul) {
-                if (queenState === 'POCKETED_WAITING_COVER' && queenPocketedBy !== null && queenPocketedBy !== currentPlayer) {
-                    respotQueen();
-                }
-                currentPlayer = currentPlayer === 1 ? 2 : 1;
-                showBanner(currentPlayer === 1 ? "Player 1's Turn" : (isVsAI ? "AI's Turn" : "Player 2's Turn"));
-            }
-
-            // Reset for next shot
-            turnPocketedPieces = [];
-            resetStrikerPosition();
-            updateUI();
-
-            // Trigger AI if applicable
-            if (isVsAI && currentPlayer === 2 && !gameOver) {
-                setTimeout(makeAIMove, 1000);
-            }
-        }
-
-        function respotQueen() {
-            const q = pieces.find(p => p.type === PIECE_TYPES.QUEEN);
-            if (q) {
-                q.isPocketed = false;
-                q.x = CANVAS_SIZE / 2;
-                q.y = CANVAS_SIZE / 2;
-                q.vx = 0;
-                q.vy = 0;
-                queenState = 'IN_PLAY';
-                queenPocketedBy = null;
-                showBanner("QUEEN RETURNED TO BOARD");
-            }
-        }
-
-        // --- AI LOGIC ENGINE ---
-        function makeAIMove() {
-            if (gameOver || currentPlayer !== 2) return;
-
-            // Find target piece (prioritize Queen or easiest White/Black piece)
-            const available = pieces.filter(p => !p.isPocketed);
-            if (available.length === 0) return;
-
-            // Pick a random piece to target
-            let target = available.find(p => p.type === PIECE_TYPES.QUEEN) || available[Math.floor(Math.random() * available.length)];
-
-            // Position Striker automatically on baseline
-            const minX = FRAME_MARGIN + 80;
-            const maxX = CANVAS_SIZE - FRAME_MARGIN - 80;
-            striker.x = minX + Math.random() * (maxX - minX);
-            striker.y = FRAME_MARGIN + BASELINE_OFFSET;
-
-            // Aim towards target with slight random variance for realistic play
-            const angle = Math.atan2(target.y - striker.y, target.x - striker.x) + (Math.random() - 0.5) * 0.15;
-            const power = 14 + Math.random() * 10;
-
-            striker.vx = Math.cos(angle) * power;
-            striker.vy = Math.sin(angle) * power;
-            isMoving = true;
-            audio.playHit(0.8);
-        }
-
-        // --- MAIN GAME LOOP ---
-        function gameLoop() {
-            ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
-
-            drawBoard();
-            updatePhysics();
-
-            // Draw Pieces & Striker
-            pieces.forEach(p => p.draw(ctx));
-            if (!striker.isPocketed) striker.draw(ctx);
-
-            drawAimLine();
-
-            requestAnimationFrame(gameLoop);
-        }
-
-        // --- UI & CONTROLS INTERACTION ---
-        function setupEvents() {
-            const slider = document.getElementById('strikerSlider');
-            
-            slider.addEventListener('input', () => {
-                if (!isMoving) resetStrikerPosition();
-            });
-
-            // Pointer / Touch Interactions for Aiming
-            canvas.addEventListener('pointerdown', (e) => {
-                if (isMoving || (isVsAI && currentPlayer === 2)) return;
-
-                const rect = canvas.getBoundingClientRect();
-                const scale = CANVAS_SIZE / rect.width;
-                const px = (e.clientX - rect.left) * scale;
-                const py = (e.clientY - rect.top) * scale;
-
-                // Check distance to striker
-                if (Math.hypot(px - striker.x, py - striker.y) < striker.radius * 2.5) {
-                    isAiming = true;
-                    aimStart = { x: striker.x, y: striker.y };
-                    dragCurrent = { x: px, y: py };
-                }
-            });
-
-            canvas.addEventListener('pointermove', (e) => {
-                if (!isAiming) return;
-                const rect = canvas.getBoundingClientRect();
-                const scale = CANVAS_SIZE / rect.width;
-                dragCurrent = {
-                    x: (e.clientX - rect.left) * scale,
-                    y: (e.clientY - rect.top) * scale
-                };
-            });
-
-            canvas.addEventListener('pointerup', () => {
-                if (!isAiming) return;
-                isAiming = false;
-
-                const dx = aimStart.x - dragCurrent.x;
-                const dy = aimStart.y - dragCurrent.y;
-                const dist = Math.hypot(dx, dy);
-
-                if (dist > 12) {
-                    const power = Math.min(dist * 0.16, 26);
-                    const angle = Math.atan2(dy, dx);
-
-                    striker.vx = Math.cos(angle) * power;
-                    striker.vy = Math.sin(angle) * power;
-                    isMoving = true;
-                    audio.playHit(1);
-                }
-            });
-
-            // Button Click Listeners
-            document.getElementById('restartBtn').addEventListener('click', resetBoard);
-            document.getElementById('modalPlayAgain').addEventListener('click', resetBoard);
-
-            document.getElementById('modeBtn').addEventListener('click', () => {
-                isVsAI = !isVsAI;
-                document.getElementById('modeText').textContent = isVsAI ? 'vs AI' : '2 Player';
-                document.getElementById('p2Name').textContent = isVsAI ? 'AI Bot' : 'Player 2';
-                resetBoard();
-            });
-
-            document.getElementById('audioToggle').addEventListener('click', () => {
-                audio.muted = !audio.muted;
-                document.getElementById('soundIcon').setAttribute('data-lucide', audio.muted ? 'volume-x' : 'volume-2');
-                lucide.createIcons();
-            });
-        }
-
-        function updateUI() {
-            document.getElementById('p1Score').textContent = `${scores[1]} pts`;
-            document.getElementById('p2Score').textContent = `${scores[2]} pts`;
-
-            // Player Cards Highlight
-            const p1Card = document.getElementById('p1Card');
-            const p2Card = document.getElementById('p2Card');
-
-            if (currentPlayer === 1) {
-                p1Card.className = "flex items-center space-x-2 p-1.5 px-3 rounded-lg border border-amber-500/50 bg-amber-500/20 shadow-lg transition-all";
-                p2Card.className = "flex items-center space-x-2 p-1.5 px-3 rounded-lg border border-transparent transition-all opacity-60";
-            } else {
-                p2Card.className = "flex items-center space-x-2 p-1.5 px-3 rounded-lg border border-indigo-500/50 bg-indigo-500/20 shadow-lg transition-all";
-                p1Card.className = "flex items-center space-x-2 p-1.5 px-3 rounded-lg border border-transparent transition-all opacity-60";
-            }
-
-            // Queen Status Label
-            const queenElem = document.getElementById('queenStatus');
-            if (queenState === 'IN_PLAY') {
-                queenElem.innerHTML = `<span class="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block animate-pulse"></span><span>In Play</span>`;
-            } else if (queenState === 'POCKETED_WAITING_COVER') {
-                queenElem.innerHTML = `<span class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span><span>Needs Cover</span>`;
-            } else {
-                queenElem.innerHTML = `<span class="w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block"></span><span>Covered</span>`;
-            }
-
-            // Update Pocketed Pieces Tray Display
-            const tray = document.getElementById('pocketedTray');
-            tray.innerHTML = '';
-            const pocketed = pieces.filter(p => p.isPocketed);
-
-            if (pocketed.length === 0) {
-                tray.innerHTML = `<span class="text-slate-500 italic text-[11px]">None</span>`;
-            } else {
-                pocketed.forEach(p => {
-                    const dot = document.createElement('div');
-                    dot.className = "w-4 h-4 rounded-full border border-slate-600 shadow-sm flex-shrink-0";
-                    if (p.type === PIECE_TYPES.WHITE) dot.style.backgroundColor = '#fef3c7';
-                    else if (p.type === PIECE_TYPES.BLACK) dot.style.backgroundColor = '#1e293b';
-                    else if (p.type === PIECE_TYPES.QUEEN) dot.style.backgroundColor = '#e11d48';
-                    tray.appendChild(dot);
-                });
-            }
-        }
-
-        function showBanner(text) {
-            const banner = document.getElementById('turnBanner');
-            document.getElementById('turnText').textContent = text;
-            banner.classList.remove('opacity-0');
-            setTimeout(() => {
-                banner.classList.add('opacity-0');
-            }, 1800);
-        }
-
-        function endGame() {
-            gameOver = true;
-            const modal = document.getElementById('gameOverModal');
-            const winnerTxt = document.getElementById('winnerText');
-            const scoreTxt = document.getElementById('winnerScore');
-
-            let winnerName = "PLAYER 1";
-            let maxScore = scores[1];
-
-            if (scores[2] > scores[1]) {
-                winnerName = isVsAI ? "AI BOT" : "PLAYER 2";
-                maxScore = scores[2];
-            } else if (scores[1] === scores[2]) {
-                winnerName = "IT'S A TIE!";
-            }
-
-            winnerTxt.textContent = `${winnerName} WINS!`;
-            scoreTxt.textContent = `High Score: ${maxScore} pts`;
-            modal.classList.remove('hidden');
-        }
-
-        // Start Game on Page Load
-        window.onload = initGame;
-    </script>
+    <div class="cell">
+      <div class="k">Share ID</div>
+      <div class="v">Invite People</div>
+    </div>
+    <div class="cell">
+      <div class="k">₹250</div>
+      <div class="v">Per User</div>
+    </div>
+  </div>
+
+  <div class="cta">
+    <a href="1.html" class="btn btn-primary">Create Account — ₹500</a>
+    <a href="web.html" class="btn btn-primary">BUY AND SELL WEBSITES</a>
+    <a href="1.html" class="btn btn-ghost">Login</a>
+  </div>
+
+  <div class="scroll-hint">
+    <span>Scroll</span>
+    <div class="ln"></div>
+  </div>
+</header>
+
+
+
+<!-- ================= FOOTER ================= -->
+<footer>
+  <div class="f-brand">
+    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcST0nI7u8NHDNezXxIimeRekeRxPW5KBewhxYFLe-Lbdg&s=10"
+         alt="ELUMINA" referrerpolicy="no-referrer" onerror="this.style.display='none'">
+    <span class="n">ELUMINA</span>
+  </div>
+  <p class="made">Created with obsession by <span>DEVIL</span></p>
+
+  <div class="f-links">
+    <a href="web.html">How It Works</a>
+    <a href="web.html">Earnings</a>
+    <a href="1.html">Create Account</a>
+    <a href="#faq">FAQ</a>
+    <a href="1.html">Login</a>
+  </div>
+
+  <div class="copy">© 2025 ELUMINA — ALL RIGHTS RESERVED</div>
+</footer>
+
+<!-- toast -->
+<div class="toast" id="toast">Copied!</div>
+
+<script>
+/* ================= CUSTOM CURSOR ================= */
+const dot  = document.querySelector('.cur-dot');
+const ring = document.querySelector('.cur-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove', e=>{
+  mx = e.clientX; my = e.clientY;
+  dot.style.left = mx+'px';
+  dot.style.top  = my+'px';
+});
+(function loop(){
+  rx += (mx-rx)*0.18;
+  ry += (my-ry)*0.18;
+  ring.style.left = rx+'px';
+  ring.style.top  = ry+'px';
+  requestAnimationFrame(loop);
+})();
+const hoverables = 'a, button, .step, .cell, .panel, .price, details, summary, input, select, .card';
+function bindHover(){
+  document.querySelectorAll(hoverables).forEach(el=>{
+    el.addEventListener('mouseenter', ()=>ring.classList.add('hover'));
+    el.addEventListener('mouseleave', ()=>ring.classList.remove('hover'));
+  });
+}
+bindHover();
+/* ================= NAV ================= */
+const nav = document.getElementById('nav');
+const burger = document.getElementById('burger');
+const links = document.getElementById('links');
+window.addEventListener('scroll', ()=>{
+  nav.classList.toggle('scrolled', window.scrollY > 40);
+});
+burger.addEventListener('click', ()=>{
+  links.classList.toggle('open');
+  burger.classList.toggle('x');
+});
+links.querySelectorAll('a').forEach(a=>{
+  a.addEventListener('click', ()=>{
+    links.classList.remove('open');
+    burger.classList.remove('x');
+  });
+});
+/* ================= REVEAL ================= */
+const io = new IntersectionObserver((entries)=>{
+  entries.forEach((e,i)=>{
+    if(e.isIntersecting){
+      setTimeout(()=> e.target.classList.add('in'), i*90);
+      io.unobserve(e.target);
+    }
+  });
+},{threshold:.12});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+/* ================= CARD SPOTLIGHT ================= */
+document.querySelectorAll('.step, .cell').forEach(el=>{
+  el.addEventListener('mousemove', ev=>{
+    const r = el.getBoundingClientRect();
+    el.style.setProperty('--mx', (ev.clientX-r.left)+'px');
+    el.style.setProperty('--my', (ev.clientY-r.top)+'px');
+  });
+});
+/* ================= EARNINGS CALCULATOR ================= */
+const range  = document.getElementById('refRange');
+const refOut = document.getElementById('refOut');
+const earnOut= document.getElementById('earnOut');
+const netOut = document.getElementById('netOut');
+const FEE = 500, PER = 250;
+function fmt(n){ return '₹' + n.toLocaleString('en-IN'); }
+function updateCalc(){
+  const n = +range.value;
+  refOut.textContent = n;
+  earnOut.textContent = fmt(n * PER);
+  const net = n*PER - FEE;
+  netOut.textContent = fmt(net);
+  netOut.style.color = net >= 0 ? '#67e8f9' : '#f472b6';
+  const pct = ((range.value - range.min) / (range.max - range.min)) * 100;
+  range.style.background =
+    `linear-gradient(90deg, var(--purple) 0%, var(--cyan) ${pct}%, rgba(255,255,255,.12) ${pct}%, rgba(255,255,255,.12) 100%)`;
+}
+range.addEventListener('input', updateCalc);
+updateCalc();
+/* ================= TOAST ================= */
+const toast = document.getElementById('toast');
+let toastTimer;
+function showToast(msg){
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=> toast.classList.remove('show'), 2600);
+}
+/* ================= SIGNUP FORM ================= */
+const form   = document.getElementById('joinForm');
+const idCard = document.getElementById('idCard');
+const idCode = document.getElementById('idCode');
+function makeId(){
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let s = '';
+  for(let i=0;i<6;i++) s += chars[Math.floor(Math.random()*chars.length)];
+  return 'ELU-' + s;
+}
+form.addEventListener('submit', e=>{
+  e.preventDefault();
+  const name  = document.getElementById('fname').value.trim();
+  const email = document.getElementById('femail').value.trim();
+  const phone = document.getElementById('fphone').value.trim();
+  if(!name || !email || !phone){
+    showToast('Please fill in your name, email and phone.');
+    return;
+  }
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+    showToast('Please enter a valid email address.');
+    return;
+  }
+  const id = makeId();
+  idCode.textContent = id;
+  idCard.classList.add('show');
+  idCard.scrollIntoView({behavior:'smooth', block:'center'});
+  showToast('Account created! Activation fee ₹500.');
+  bindHover();
+});
+/* ================= COPY ID ================= */
+document.getElementById('copyId').addEventListener('click', async ()=>{
+  const text = idCode.textContent;
+  try{
+    await navigator.clipboard.writeText(text);
+    showToast('ID copied: ' + text);
+  }catch(err){
+    const t = document.createElement('textarea');
+    t.value = text; document.body.appendChild(t);
+    t.select(); document.execCommand('copy'); t.remove();
+    showToast('ID copied: ' + text);
+  }
+});
+/* ================= PARALLAX BLOBS ================= */
+const blobs = document.querySelectorAll('.blob');
+document.addEventListener('mousemove', e=>{
+  const x = (e.clientX / window.innerWidth  - .5) * 34;
+  const y = (e.clientY / window.innerHeight - .5) * 34;
+  blobs.forEach((b,i)=>{
+    const f = (i+1) * 0.55;
+    b.style.marginLeft = (x*f)+'px';
+    b.style.marginTop  = (y*f)+'px';
+  });
+});
+/* ================= SMOOTH ANCHORS ================= */
+document.querySelectorAll('a[href^="#"]').forEach(a=>{
+  a.addEventListener('click', e=>{
+    const target = document.querySelector(a.getAttribute('href'));
+    if(target){
+      e.preventDefault();
+      target.scrollIntoView({behavior:'smooth', block:'start'});
+    }
+  });
+});
+</script>
 </body>
 </html>
