@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>₹500 Payment - Scan & Pay</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    padding: 20px;
+  }
+  .card {
+    background: #ffffff;
+    border-radius: 24px;
+    padding: 36px 28px;
+    max-width: 380px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    animation: pop 0.5s ease;
+  }
+  @keyframes pop {
+    from { transform: scale(0.9); opacity: 0; }
+    to   { transform: scale(1);   opacity: 1; }
+  }
+  .badge {
+    display: inline-block;
+    background: #e8f5e9;
+    color: #2e7d32;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 50px;
+    margin-bottom: 16px;
+  }
+  h1 {
+    font-size: 22px;
+    color: #1a1a1a;
+    margin-bottom: 6px;
+  }
+  .subtitle {
+    font-size: 14px;
+    color: #777;
+    margin-bottom: 22px;
+  }
+  .amount {
+    font-size: 42px;
+    font-weight: 800;
+    color: #2575fc;
+    margin: 4px 0 22px;
+    letter-spacing: -1px;
+  }
+  .amount span {
+    font-size: 24px;
+    color: #999;
+    font-weight: 600;
+  }
+  /* ===== QR BOX — yeh important hai ===== */
+  .qr-box {
+    background: #ffffff;
+    border: 3px solid #2575fc;
+    border-radius: 18px;
+    padding: 14px;
+    display: inline-block;
+    margin-bottom: 20px;
+    box-shadow: 0 6px 20px rgba(37,117,252,0.2);
+  }
+  .qr-box img {
+    display: block;
+    width: 220px;
+    height: 220px;
+    object-fit: contain;      /* QR kabhi crop nahi hoga */
+    image-rendering: crisp-edges;
+    image-rendering: pixelated; /* QR sharp dikhega */
+    background: #fff;
+  }
+  .instruction {
+    font-size: 17px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 10px;
+    line-height: 1.5;
+  }
+  .instruction b { color: #2575fc; }
+  .hint {
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 22px;
+  }
+  .pay-btn {
+    width: 100%;
+    padding: 15px;
+    font-size: 17px;
+    font-weight: 700;
+    color: #fff;
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .pay-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(37,117,252,0.4);
+  }
+  .pay-btn:active { transform: scale(0.98); }
+  .footer {
+    margin-top: 18px;
+    font-size: 12px;
+    color: #aaa;
+  }
+</style>
+</head>
+<body>
+
+  <div class="card">
+    <div class="badge">✅ Secure Payment</div>
+
+    <h1>Scan & Pay</h1>
+    <p class="subtitle">QR code scan karein aur payment karein</p>
+
+    <div class="amount">₹500 <span>only</span></div>
+
+    <!-- QR CODE -->
+    <div class="qr-box">
+      <img src="qr.png" alt="Payment QR Code" id="qrImg" />
+    </div>
+
+    <p class="instruction">Ismein <b>₹500</b> send karo 💸</p>
+    <p class="hint">UPI / Google Pay / PhonePe / Paytm se scan karein</p>
+
+    <button class="pay-btn" ><a href="2.html" class="pay-btn">VERIFY YOUR ACCOUNT</a></button>
+
+    <p class="footer">Payment karne ke baad screenshot bhejein</p>
+  </div>
+
+<script>
+  // QR image load error handle
+  const qr = document.getElementById('qrImg');
+  qr.onerror = function () {
+    this.src = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcST0nI7u8NHDNezXxIimeRekeRxPW5KBewhxYFLe-Lbdg&s=10';
+    this.alt = 'QR Code';
+  };
+  // UPI ID copy karne ke liye (apni UPI ID daalein)
+  const UPI_ID = "yourupi@upi";  // <-- apni UPI ID yahan likhein
+  function copyUPI() {
+    navigator.clipboard.writeText(UPI_ID)
+      .then(() => alert("UPI ID copied: " + UPI_ID))
+      .catch(() => alert("UPI ID: " + UPI_ID));
+  }
+</script>
+
+</body>
+</html>
